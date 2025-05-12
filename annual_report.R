@@ -97,8 +97,8 @@
             #In the text, and in table 3.1
             
             sql_string_1 <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where (collection_dtime_est > '%s' OR collection_dtime_est is null)
-                                  and deployment_dtime_est between '%s' and '%s'
+                                  where (collection_dtime > '%s' OR collection_dtime is null)
+                                  and deployment_dtime between '%s' and '%s'
                                   and public =  TRUE"
             table_3_1_public_sensors_deployed_postcon <- dbGetQuery(poolConn, paste(sprintf(sql_string_1, FYSTART_reactive(),FYSTART_reactive(), FYEND_reactive()),collapse="")) 
             
@@ -107,9 +107,9 @@
     
             sql_string_2 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
                                             where d.public = true and
-                                            (deployment_dtime_est between '%s' and '%s'
-                                            or collection_dtime_est between '%s' and '%s'
-                                            or (deployment_dtime_est < '%s' and collection_dtime_est is null))"
+                                            (deployment_dtime between '%s' and '%s'
+                                            or collection_dtime between '%s' and '%s'
+                                            or (deployment_dtime < '%s' and collection_dtime is null))"
             
             table_3_1_public_systems_monitored <- dbGetQuery(poolConn, paste(sprintf(sql_string_2, FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive()), collapse="")) 
             
@@ -124,7 +124,7 @@
             
             #Sensors deployed to date
             sql_string_4 <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                                where deployment_dtime_est <= '%s'
+                                                where deployment_dtime <= '%s'
                                                 and public = TRUE"
             
             table_3_1_public_sensors_deployed_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_4,FYEND_reactive()),collapse=""))
@@ -132,7 +132,7 @@
             #Public systems monitored to date
             #In the text, and in table 3.1
             sql_string_5 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                                where deployment_dtime_est <= '%s'
+                                                where deployment_dtime <= '%s'
                                                 and d.public = true"
             table_3_1_public_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_5,FYEND_reactive()),collapse=""))
             
@@ -161,7 +161,7 @@
                                                 left join external.mat_assets sfc on d.smp_id = sfc.smp_id
                                                 where sfc.component_id is null
                                                 and d.smp_id is not null
-                                                and d.deployment_dtime_est < '%s'
+                                                and d.deployment_dtime < '%s'
                                                 and d.public = true
                                                 group by sfc.asset_type, d.public"
             
@@ -444,8 +444,8 @@
             #First column, first row - GW monitoring prior to construction of GSI this fiscal year
             
             sql_string_20 <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
-                                                and deployment_dtime_est <= '%s'
-                                                and (collection_dtime_est >= '%s' OR collection_dtime_est is null)
+                                                and deployment_dtime <= '%s'
+                                                and (collection_dtime >= '%s' OR collection_dtime is null)
                                                 and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
             table_3_9_public_gw_monitoring_precon <- dbGetQuery(poolConn, paste(sprintf(sql_string_20, FYEND_reactive(), FYSTART_reactive()),collapse=""))
             
@@ -458,8 +458,8 @@
             #Post-construction GW monitoring at GSI this fiscal year
             #First column, second row 
             sql_string_22 <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
-                                                and deployment_dtime_est <= '%s'
-                                                and (collection_dtime_est >= '%s' OR collection_dtime_est is null)
+                                                and deployment_dtime <= '%s'
+                                                and (collection_dtime >= '%s' OR collection_dtime is null)
                                                 and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
             table_3_9_public_gw_monitoring_postcon <- dbGetQuery(poolConn, paste(sprintf(sql_string_22, FYEND_reactive(), FYSTART_reactive()),collapse=""))
             
@@ -487,15 +487,15 @@
             #First column, first row - Sensor deployments this fiscal year
             
             sql_string_24 <-  "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where (collection_dtime_est > '%s' OR collection_dtime_est is null)
-                                  and deployment_dtime_est between '%s' and '%s'
+                                  where (collection_dtime > '%s' OR collection_dtime is null)
+                                  and deployment_dtime between '%s' and '%s'
                                   and public = FALSE"
             
             table_3_10_private_sensors_deployed <- dbGetQuery(poolConn, paste(sprintf(sql_string_24, FYSTART_reactive(), FYSTART_reactive(), FYEND_reactive()),collapse="")) 
             
             #Second column, first row - Sensor deployments to date (private)
             sql_string <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where deployment_dtime_est < '%s'
+                                  where deployment_dtime < '%s'
                                   and public = FALSE"
             
             table_3_10_private_sensors_deployed_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string,FYEND_reactive()),collapse="")) 
@@ -504,15 +504,15 @@
             #First column, second row - Systems monitored this fiscal year
             
             sql_string_25 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                  where deployment_dtime_est between '%s' and '%s'
-                                  and (collection_dtime_est >= '%s'
-                                      or collection_dtime_est is null) 
+                                  where deployment_dtime between '%s' and '%s'
+                                  and (collection_dtime >= '%s'
+                                      or collection_dtime is null) 
                                   and d.public = false"
             table_3_10_private_systems_monitored <- dbGetQuery(poolConn, paste(sprintf(sql_string_25, FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive()),collapse="")) 
             
             #Systems monitored to date (private)
             sql_string_26 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                  where deployment_dtime_est <= '%s'
+                                  where deployment_dtime <= '%s'
                                   and d.public = false"
             table_3_10_private_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_26, FYEND_reactive()),collapse="")) 
             
@@ -520,8 +520,8 @@
             sql_string_27 <-"select count(distinct admin.fun_smp_to_system(newdeployments.smp_id)) FROM 
                                           	(select d.smp_id FROM fieldwork.viw_deployment_full_cwl d 
                                                group BY d.smp_id, d.public
-                                               having min(d.deployment_dtime_est) > '%s'
-                                               and min(d.deployment_dtime_est) <= '%s'
+                                               having min(d.deployment_dtime) > '%s'
+                                               and min(d.deployment_dtime) <= '%s'
                                                and d.public = false) newdeployments"
             table_3_10_private_new_systems_monitored<- dbGetQuery(poolConn, paste(sprintf(sql_string_27, FYSTART_reactive(), FYEND_reactive()),collapse=""))
             
@@ -554,7 +554,7 @@
                   fieldwork.viw_deployment_full_cwl d
                   left join external.tbl_planreview_crosstab cr on d.smp_id = cr.\"smp_id\"::text
                   where d.smp_id is not null
-                  and d.deployment_dtime_est < '%s'
+                  and d.deployment_dtime < '%s'
                   and d.public = false
                   group by cr.\"smp_type\", d.public;"
             
