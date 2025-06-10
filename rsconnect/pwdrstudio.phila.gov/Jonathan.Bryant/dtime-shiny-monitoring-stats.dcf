@@ -1,0 +1,12 @@
+name: dtime-shiny-monitoring-stats
+title: dtime-shiny-monitoring-stats
+username: Jonathan.Bryant
+account: Jonathan.Bryant
+server: pwdrstudio.phila.gov
+hostUrl: https://pwdrstudio.phila.gov/__api__
+appId: 508
+bundleId: 3275
+url: https://pwdrstudio.phila.gov/content/dac83f61-b664-44de-8252-b4333af4ca49/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
