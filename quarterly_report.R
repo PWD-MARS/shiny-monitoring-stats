@@ -273,7 +273,7 @@
         #Deployment Records - PUBLIC SMPs and Systems with sensors collected during the Quarter
         rv$public_sys_smp_sensors_query <- reactive(paste0("SELECT DISTINCT d.smp_id, admin.fun_smp_to_system(d.smp_id) AS system_id
                                                             FROM fieldwork.viw_deployment_full_cwl AS d
-                                                            WHERE collection_dtime_est <='", rv$end_date(),"'AND collection_dtime_est >='", rv$start_date(),"' 
+                                                            WHERE collection_dtime <='", rv$end_date(),"'AND collection_dtime >='", rv$start_date(),"' 
                                                             AND d.public = TRUE"))
         
         rv$public_sys_smp_sensors_value <- reactive(dbGetQuery(poolConn, rv$public_sys_smp_sensors_query()))
@@ -379,9 +379,9 @@
         # Monitoring locations- unique combo of smp-id/ow_suffix
         
         pupc$sensors_deployed_q <- reactive(paste0("SELECT COUNT(distinct(smp_id, ow_suffix)) FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = TRUE AND smp_id is NOT NULL"))
         
         pupc$sensors_deployed_value <- reactive(dbGetQuery(poolConn, pupc$sensors_deployed_q()))
@@ -391,16 +391,16 @@
         
         #table for download
         pupc$sensors_deployed_q_table <- reactive(paste0("SELECT distinct(smp_id, ow_suffix) as location FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = TRUE AND smp_id is NOT NULL"))
         
         # table for download previous quarter
         pupc$sensors_deployed_previous_q_table <- reactive(paste0("SELECT distinct(smp_id, ow_suffix) as location FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date()%m-% months(3), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date()%m-% months(3), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date()%m-% months(3), "'
+                                                    AND (collection_dtime >= '", rv$start_date()%m-% months(3), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = TRUE AND smp_id is NOT NULL"))
         pupc$sensors_deployed_value_previous_table <- reactive(dbGetQuery(poolConn, pupc$sensors_deployed_previous_q_table()) %>%
                                                                  mutate(present_in_prior_q = "Yes"))
@@ -414,9 +414,9 @@
         
         #systems with CWL monitoring this quarter
         pupc$systems_monitored_q <- reactive(paste0("SELECT COUNT(DISTINCT admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = TRUE AND smp_id is NOT NULL"))
 
         pupc$systems_monitored_value <- reactive(dbGetQuery(poolConn, pupc$systems_monitored_q()))
@@ -426,16 +426,16 @@
         
         #systems with CWL monitoring this quarter-entire table
         pupc$systems_monitored_q_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = TRUE AND smp_id is NOT NULL"))
         
         #systems with CWL monitoring this quarter-entire table
         pupc$systems_monitored_q_previous_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date()%m-% months(3), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date()%m-% months(3), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date()%m-% months(3), "'
+                                                    AND (collection_dtime >= '", rv$start_date()%m-% months(3), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = TRUE AND smp_id is NOT NULL"))
         pupc$systems_monitored_value_previous_table <- reactive(dbGetQuery(poolConn, pupc$systems_monitored_q_previous_table()) %>%
                                                                   mutate(present_in_prior_q = "Yes")
@@ -450,10 +450,10 @@
         #Systems newly monitored this quarter
         #Systems deployed at for the first time this quarter
         pupc$systems_newly_monitored_qtr_q <- reactive(paste0("with last_quarter as (SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-          WHERE d.public = TRUE and deployment_dtime_est < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
+          WHERE d.public = TRUE and deployment_dtime < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
                 
           SELECT count(DISTINCT(admin.fun_smp_to_system(d.smp_id))) FROM fieldwork.viw_deployment_full_cwl d
-            WHERE d.public = TRUE and deployment_dtime_est <= '", rv$end_date(), "' 
+            WHERE d.public = TRUE and deployment_dtime <= '", rv$end_date(), "' 
             and admin.fun_smp_to_system(d.smp_id) is not null and admin.fun_smp_to_system(d.smp_id) not in (select * from last_quarter)"))
         pupc$systems_newly_monitored_qtr_value <- reactive(dbGetQuery(poolConn, pupc$systems_newly_monitored_qtr_q()))
         pupc$systems_newly_monitored_qtr <- reactive(data.frame(Metric = as.character("Systems Newly Monitored this Quarter"), 
@@ -462,17 +462,17 @@
         #Systems newly monitored this quarter-table download
         #Systems deployed at for the first time this quarter
         pupc$systems_newly_monitored_qtr_q_table <- reactive(paste0("with last_quarter as (SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-          WHERE d.public = TRUE and deployment_dtime_est < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
+          WHERE d.public = TRUE and deployment_dtime < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
                 
           SELECT DISTINCT(admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-            WHERE d.public = TRUE and deployment_dtime_est <= '", rv$end_date(), "' 
+            WHERE d.public = TRUE and deployment_dtime <= '", rv$end_date(), "' 
             and admin.fun_smp_to_system(d.smp_id) is not null and admin.fun_smp_to_system(d.smp_id) not in (select * from last_quarter)"))
         pupc$systems_newly_monitored_qtr_value_table <- reactive(dbGetQuery(poolConn, pupc$systems_newly_monitored_qtr_q_table()))
         
         #systems with CWL monitoring to-date
         #No. of public systems monitored to date
         pupc$systems_monitored_to_date_q <- reactive(paste0("SELECT COUNT(DISTINCT admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-                                                    WHERE d.public = TRUE and smp_id is NOT NULL and deployment_dtime_est <= '", rv$end_date(), "'"))
+                                                    WHERE d.public = TRUE and smp_id is NOT NULL and deployment_dtime <= '", rv$end_date(), "'"))
 
         pupc$systems_monitored_to_date_value <- reactive(dbGetQuery(poolConn, pupc$systems_monitored_to_date_q()))
         pupc$systems_monitored_to_date <- reactive(data.frame(Metric = as.character("Systems Monitored to-Date"),
@@ -480,7 +480,7 @@
                                                                    Count = pupc$systems_monitored_to_date_value()))
         #table version for dl
         pupc$systems_monitored_to_date_q_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) FROM fieldwork.viw_deployment_full_cwl d
-                                                    WHERE d.public = TRUE and smp_id is NOT NULL and deployment_dtime_est <= '", rv$end_date(), "'"))
+                                                    WHERE d.public = TRUE and smp_id is NOT NULL and deployment_dtime <= '", rv$end_date(), "'"))
         
         pupc$systems_monitored_to_date_value_table <- reactive(dbGetQuery(poolConn, pupc$systems_monitored_to_date_q_table()))
 # 
@@ -951,9 +951,9 @@
         
         # Monitoring locations- unique combo of smp-id/ow_suffix
         prpc$sensors_deployed_q <- reactive(paste0("SELECT COUNT(distinct(smp_id, ow_suffix)) FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = FALSE"))
         
         prpc$sensors_deployed_value <- reactive(dbGetQuery(poolConn, prpc$sensors_deployed_q()))
@@ -963,15 +963,15 @@
         
         #dl table
         prpc$sensors_deployed_q_table <- reactive(paste0("SELECT distinct(smp_id, ow_suffix) as location FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = FALSE"))
         # previous table
         prpc$sensors_deployed_q_previous_table <- reactive(paste0("SELECT distinct(smp_id, ow_suffix) as location FROM fieldwork.viw_deployment_full_cwl 
-                                             WHERE deployment_dtime_est <= '", rv$end_date()%m-% months(3), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date()%m-% months(3), "' 
-                                             OR collection_dtime_est IS NULL) AND 
+                                             WHERE deployment_dtime <= '", rv$end_date()%m-% months(3), "'
+                                                    AND (collection_dtime >= '", rv$start_date()%m-% months(3), "' 
+                                             OR collection_dtime IS NULL) AND 
                                              public = FALSE"))
         
         
@@ -987,9 +987,9 @@
         
         #systems with CWL monitoring this quarter
         prpc$systems_monitored_q <- reactive(paste0("SELECT COUNT(DISTINCT admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = FALSE"))
         
         prpc$systems_monitored_value <- reactive(dbGetQuery(poolConn, prpc$systems_monitored_q()))
@@ -999,16 +999,16 @@
         
         #systems with CWL monitoring this quarter-table
         prpc$systems_monitored_q_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date(), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date(), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date(), "'
+                                                    AND (collection_dtime >= '", rv$start_date(), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = FALSE"))
         
         # prior quarter
         prpc$systems_monitored_q_previous_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-                                                       WHERE deployment_dtime_est <= '", rv$end_date()%m-% months(3), "'
-                                                    AND (collection_dtime_est >= '", rv$start_date()%m-% months(3), "'
-                                             OR collection_dtime_est IS NULL)
+                                                       WHERE deployment_dtime <= '", rv$end_date()%m-% months(3), "'
+                                                    AND (collection_dtime >= '", rv$start_date()%m-% months(3), "'
+                                             OR collection_dtime IS NULL)
                                                        AND d.public = FALSE"))
         
         
@@ -1024,10 +1024,10 @@
         #Systems newly monitored this quarter
         #Systems deployed at for the first time this quarter
         prpc$systems_newly_monitored_qtr_q <- reactive(paste0("with last_quarter as (SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-          WHERE d.public = FALSE and deployment_dtime_est < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
+          WHERE d.public = FALSE and deployment_dtime < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
                 
           SELECT count(DISTINCT(admin.fun_smp_to_system(d.smp_id))) FROM fieldwork.viw_deployment_full_cwl d
-            WHERE d.public = FALSE and deployment_dtime_est <= '", rv$end_date(), "' 
+            WHERE d.public = FALSE and deployment_dtime <= '", rv$end_date(), "' 
             and admin.fun_smp_to_system(d.smp_id) is not null and admin.fun_smp_to_system(d.smp_id) not in (select * from last_quarter)"))
         prpc$systems_newly_monitored_qtr_value <- reactive(dbGetQuery(poolConn, prpc$systems_newly_monitored_qtr_q()))
         prpc$systems_newly_monitored_qtr <- reactive(data.frame(Metric = as.character("Systems Newly Monitored this Quarter"), 
@@ -1037,17 +1037,17 @@
         #Systems newly monitored this quarter-table
         #Systems deployed at for the first time this quarter
         prpc$systems_newly_monitored_qtr_q_table <- reactive(paste0("with last_quarter as (SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) as system_id FROM fieldwork.viw_deployment_full_cwl d
-          WHERE d.public = FALSE and deployment_dtime_est < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
+          WHERE d.public = FALSE and deployment_dtime < '", rv$start_date(), "' and admin.fun_smp_to_system(d.smp_id) is not null)
                 
           SELECT DISTINCT(admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-            WHERE d.public = FALSE and deployment_dtime_est <= '", rv$end_date(), "' 
+            WHERE d.public = FALSE and deployment_dtime <= '", rv$end_date(), "' 
             and admin.fun_smp_to_system(d.smp_id) is not null and admin.fun_smp_to_system(d.smp_id) not in (select * from last_quarter)"))
         prpc$systems_newly_monitored_qtr_value_table <- reactive(dbGetQuery(poolConn, prpc$systems_newly_monitored_qtr_q_table()))
         
         #systems with CWL monitoring to-date
         #No. of public systems monitored to date
         prpc$systems_monitored_to_date_q <- reactive(paste0("SELECT COUNT(DISTINCT admin.fun_smp_to_system(d.smp_id)) FROM fieldwork.viw_deployment_full_cwl d
-                                                    WHERE d.public = FALSE and deployment_dtime_est <= '", rv$end_date(), "'"))
+                                                    WHERE d.public = FALSE and deployment_dtime <= '", rv$end_date(), "'"))
         
         prpc$systems_monitored_to_date_value <- reactive(dbGetQuery(poolConn, prpc$systems_monitored_to_date_q()))
         prpc$systems_monitored_to_date <- reactive(data.frame(Metric = as.character("Systems Monitored to-Date"),
@@ -1057,7 +1057,7 @@
         #systems with CWL monitoring to-date-table
         #No. of public systems monitored to date
         prpc$systems_monitored_to_date_q_table <- reactive(paste0("SELECT DISTINCT admin.fun_smp_to_system(d.smp_id) FROM fieldwork.viw_deployment_full_cwl d
-                                                    WHERE d.public = FALSE and deployment_dtime_est <= '", rv$end_date(), "'"))
+                                                    WHERE d.public = FALSE and deployment_dtime <= '", rv$end_date(), "'"))
         
         prpc$systems_monitored_to_date_value_table <- reactive(dbGetQuery(poolConn, prpc$systems_monitored_to_date_q_table()))
         
