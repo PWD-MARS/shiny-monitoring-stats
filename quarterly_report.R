@@ -203,6 +203,7 @@
                                   Pub_PostCon_Metric_16=pupc$infiltration_system_tests_to_date_value_table())
               write.xlsx(x = df_list_all , file = filename, rowNames = TRUE)
             }
+            
           )
           
           output$public_con <- downloadHandler(
@@ -247,7 +248,7 @@
           
         })
 
-
+        
         #2.3 get values ---------
         
         #Get tables for metric 5 and QA queries
@@ -409,7 +410,10 @@
         pupc$sensors_deployed_value_table <- reactive(dbGetQuery(poolConn, pupc$sensors_deployed_q_table()) %>%
                                                         mutate(present_in_current_q = "Yes") %>%
                                                         full_join(pupc$sensors_deployed_value_previous_table(), by = "location") %>%
-                                                        mutate_all(coalesce, "No")
+                                                        mutate(
+                                                          present_in_current_q = coalesce(present_in_current_q, "No"),
+                                                          present_in_prior_q = coalesce(present_in_prior_q, "No")
+                                                        )
                                                         )
         
         #systems with CWL monitoring this quarter
@@ -444,7 +448,10 @@
         pupc$systems_monitored_value_table <- reactive(dbGetQuery(poolConn, pupc$systems_monitored_q_table()) %>%
                                                          mutate(present_in_current_q = "Yes") %>%
                                                          full_join(pupc$systems_monitored_value_previous_table(), by = "system_id") %>%
-                                                         mutate_all(coalesce, "No")
+                                                         mutate(
+                                                           present_in_current_q = coalesce(present_in_current_q, "No"),
+                                                           present_in_prior_q = coalesce(present_in_prior_q, "No")
+                                                         )
                                                          )
 
         #Systems newly monitored this quarter
@@ -982,7 +989,10 @@
         prpc$sensors_deployed_value_table <- reactive(dbGetQuery(poolConn, prpc$sensors_deployed_q_table()) %>%
                                                         mutate(present_in_current_q = "Yes") %>%
                                                         full_join(prpc$sensors_deployed_value_previous_table(), by = "location") %>%
-                                                        mutate_all(coalesce, "No"))
+                                                        mutate(
+                                                          present_in_current_q = coalesce(present_in_current_q, "No"),
+                                                          present_in_prior_q = coalesce(present_in_prior_q, "No")
+                                                        ))
         
         
         #systems with CWL monitoring this quarter
@@ -1019,7 +1029,10 @@
         prpc$systems_monitored_value_table <- reactive(dbGetQuery(poolConn, prpc$systems_monitored_q_table()) %>%
                                                          mutate(present_in_current_q = "Yes") %>%
                                                          full_join(prpc$systems_monitored_value_previous_table(), by = "system_id") %>%
-                                                         mutate_all(coalesce, "No"))
+                                                         mutate(
+                                                           present_in_current_q = coalesce(present_in_current_q, "No"),
+                                                           present_in_prior_q = coalesce(present_in_prior_q, "No")
+                                                         ))
         
         #Systems newly monitored this quarter
         #Systems deployed at for the first time this quarter
@@ -1196,6 +1209,7 @@
         prpc$systems_tested_cet_to_date_value_table <- reactive(dbGetQuery(poolConn, prpc$systems_tested_cet_to_date_q_table()))
       }
     )
+    
   }
     
         
