@@ -23,7 +23,7 @@ library(DT)
 library(reactable)
 
 #annual report stuff
-library(reactablefmtr)
+#library(reactablefmtr)
 library(shinydashboard)
 library(openxlsx)
 
@@ -40,7 +40,7 @@ options(DT.options = list(pageLength = 15))
 poolConn <- dbPool(RPostgres::Postgres(),
                       host = "PWDMARSDBS1.pwd.phila.local",
                       port = 5434,
-                      dbname = "mars_prod",
+                      dbname = "mars_fy25report",
                       user = Sys.getenv("shiny_uid"),
                       password = Sys.getenv("shiny_pwd")
 )

@@ -131,11 +131,11 @@
             
             #Public systems monitored to date
             #In the text, and in table 3.1
-            sql_string_5 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                                where deployment_dtime <= '%s'
-                                                and d.public = true"
-            table_3_1_public_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_5,FYEND_reactive()),collapse=""))
-            
+              sql_string_5 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
+                                                  where deployment_dtime <= '%s'
+                                                  and d.public = true"
+              table_3_1_public_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_5,FYEND_reactive()),collapse=""))
+              
             
             `This Fiscal Year`<- data.frame(c(pull(table_3_1_public_sensors_deployed_postcon),pull(table_3_1_public_systems_monitored),pull(table_3_1_public_new_systems_monitored)))
             `To Date`<-data.frame(c(pull(table_3_1_public_sensors_deployed_todate),pull(table_3_1_public_systems_monitored_todate),NA))
