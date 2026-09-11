@@ -54,13 +54,151 @@ strong("Table 6-6: Private Systems with ICTs Administered"),
 strong("Table 6-7: Private Systems with WWIs Administered"),
 	reactableOutput((ns("Private Systems with WWIs Administered")))
 
+#reactive FY start and END
+FYSTART_reactive <- reactive({
+  fystart_string <-"%s-07-01 00:00:00"
+  FYSTART <- paste(sprintf(fystart_string, as.character(as.numeric(input$fy)-1)),collapse="")
+  return(FYSTART)
+})
+
+FYEND_reactive <- reactive({
+  fyend_string <-"%s-06-30 11:59:59"
+  FYEND <- paste(sprintf(fyend_string, input$fy),collapse="")
+  return(FYEND)
+})
+        
+
 #UI output placeholder names
 table_5_1 <- reactive({
+
+	#Public sensors deployed this FY
+	  fy_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+                            where (collection_dtime > '%s' OR collection_dtime is null)
+                            and deployment_dtime between '%s' and '%s'
+                            and public =  TRUE"
+
+	  fy_public_sensors_deployed_prod <- dbGetQuery(prod, paste(sprintf(fy_public_sensors_deployed, 
+	                                                             FYSTART_reactive(),
+	                                                             FYSTART_reactive(), 
+	                                                             FYEND_reactive()),
+	                                                     collapse="")) 
+
+	#Public systems monitored this FY
+		fy_public_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) 
+		                                from fieldwork.viw_deployment_full_cwl d
+		                                where d.public = true and
+		                                (deployment_dtime between '%s' and '%s'
+		                                or collection_dtime between '%s' and '%s'
+		                                or (deployment_dtime < '%s' and collection_dtime is null))"
+		fy_public_systems_monitored_prod <- dbGetQuery(prod, 
+		                                             paste(sprintf(fy_public_systems_monitored, 
+		                                                           FYSTART_reactive(), 
+		                                                           FYEND_reactive(), 
+		                                                           FYSTART_reactive(), 
+		                                                           FYEND_reactive(), 
+		                                                           FYSTART_reactive()), 
+		                                                   collapse="")) 
+
+	#Public systems newly monitored this FY
+		fy_public_systems_newly_monitored <- "select count(*) from 
+		                                  fieldwork.viw_first_deployment_cwl f where
+		                                  public = true and
+		                                  first_deployment between '%s' and '%s'"
+
+		fy_public_systems_newly_monitored_prod <- dbGetQuery(prod, 
+		                                                  paste(sprintf(fy_public_systems_newly_monitored, 
+		                                                                FYSTART_reactive(), 
+		                                                                FYEND_reactive()),
+		                                                        collapse=""))
+
+	 #Sensors deployed to date
+	   todate_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+	                                                  where deployment_dtime <= '%s'
+	                                                  and public = TRUE"
+	   
+	   todate_public_sensors_deployed_prod <- dbGetQuery(prod, paste(sprintf(todate_public_sensors_deployed,
+	                                                                      FYEND_reactive()),
+	                                                              collapse=""))
+
+	 #Public systems monitored to date
+	   todate_public_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) 
+	                                          from fieldwork.viw_deployment_full_cwl d
+	                                          where deployment_dtime <= '%s'
+	                                          and d.public = true"
+	   
+	   todate_public_systems_monitored_prod <- dbGetQuery(prod, 
+	                                                     paste(sprintf(todate_public_systems_monitored,
+	                                                                   FYEND_reactive()),
+	                                                         collapse=""))
+
+	 	#Assembling output table
+	   public_postcon_cwl <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+	   public_postcon_cwl$fy <- c(fy_public_sensors_deployed_prod$count, #Public sensors deployed
+																fy_public_systems_monitored_prod$count, #Public systems monitored
+																fy_public_systems_newly_monitored_prod$count) #Public systems newly monitored
+
+	   public_postcon_cwl$todate <- c(todate_public_sensors_deployed_prod$count, #Public sensors deployed
+																		todate_public_systems_monitored_prod$count, #Public systems monitored
+																		NA) #Public systems newly monitored is only defined for the FY
+
+		colnames(public_postcon_cwl)<- c("This Fiscal Year","To Date")
+		rownames(public_postcon_cwl)<-c("Sensors Deployed","Systems Monitored","Systems Newly Monitored")
+
+		return(public_postcon_cwl)
 
 	})
 
 
 table_5_2 <- reactive({
+	#Public systems monitored by type todate
+	todate_public_systems_monitored_bytype <- "select sfc.asset_type, count(distinct(d.smp_id)), d.public from
+	                                                  fieldwork.viw_deployment_full_cwl d
+	                                                  left join external.mat_assets sfc on d.smp_id = sfc.smp_id
+	                                                  where sfc.component_id is null
+	                                                  and d.smp_id is not null
+	                                                  and d.deployment_dtime < '%s'
+	                                                  and d.public = true
+	                                                  group by sfc.asset_type, d.public"
+
+	todate_public_systems_monitored_bytype_prod <- dbGetQuery(prod, 
+	                                                          paste(sprintf(todate_public_systems_monitored_bytype,
+	                                                                        prod_end),
+	                                                                collapse=""))
+
+
+	#cipit statuses indicating constructed systems are Jillian Simmons's best recommendation
+	todate_public_systems_constructed_bytype <- "select count(*), smp_smptype from external.tbl_smpbdv g 
+	                                              where g.smp_notbuiltretired is null 
+	                                              and (g.cipit_status = 'Closed' 
+	                                              or g.cipit_status = 'Construction-Substantially Complete' 
+	                                              or g.cipit_status = 'Construction-Contract Closed') 
+	                                              group by smp_smptype"
+
+	todate_public_systems_constructed_bytype_prod <- dbGetQuery(prod,
+	                                                            todate_public_systems_constructed_bytype)
+
+	todate_public_systems_monitored_bytype_prod <- todate_public_systems_monitored_bytype_prod |>
+	  select(`SMP Type` = asset_type,`Monitored SMPs`=count) 
+	todate_public_systems_monitored_bytype_prod[todate_public_systems_monitored_bytype_prod[,"SMP Type"] == "Trench",1] <- "Infiltration/Storage Trench"
+
+
+	todate_public_systems_constructed_bytype_prod <- todate_public_systems_constructed_bytype_prod |>
+	  select(`SMP Type` = smp_smptype,`Total Constructed Public SMPs`=count) 
+
+	todate_public_systems_constructed_bytype_prod[todate_public_systems_constructed_bytype_prod[,"SMP Type"] == "Pervious Paving",1] <- "Permeable Pavement"
+	todate_public_prod <- todate_public_systems_constructed_bytype_prod |> 
+	  left_join(todate_public_systems_monitored_bytype_prod, by="SMP Type")
+	todate_public_prod<-todate_public_prod[,c(1,3,2)]
+
+	#Replace NA with zero
+	todate_public_prod[is.na(todate_public_prod)] <-  0
+
+	todate_public_prod$Description <- NA
+	todate_public_prod <- todate_public_prod |>
+	  select(`SMP Type`, Description,`Total Constructed Public SMPs`, `Monitored SMPs`)
+
+	todate_public_prod[todate_public_prod[,"SMP Type"] == "Infiltration/Storage Trench", 2] <- "Also listed as Trench"
+	todate_public_prod[todate_public_prod[,"SMP Type"] == "Permeable Pavement", 2] <- "Also listed as Pervious Paving"
 
 	})
 
