@@ -200,10 +200,47 @@ table_5_2 <- reactive({
 	todate_public_prod[todate_public_prod[,"SMP Type"] == "Infiltration/Storage Trench", 2] <- "Also listed as Trench"
 	todate_public_prod[todate_public_prod[,"SMP Type"] == "Permeable Pavement", 2] <- "Also listed as Pervious Paving"
 
+	return(todate_public_prod)
+
 	})
 
 
 table_5_3 <- reactive({
+	#Post-construction public SRTs this FY
+	fy_public_postcon_srt <- "select count(*), type from fieldwork.viw_srt_full 
+                            where test_date >= '%s'
+                            and test_date <= '%s'
+                            and phase = 'Post-Construction'
+                            and public = TRUE
+                            group by type"
+
+	fy_public_postcon_srt_prod <-dbGetQuery(prod, 
+	                                        paste(sprintf(fy_public_postcon_srt, 
+	                                                      prod_start, 
+	                                                      prod_end),
+	                                              collapse=""))
+
+	#Post-construction public SRTsto date
+	todate_public_postcon_srt <-"select count(*), type from fieldwork.viw_srt_full 
+	                                                          where test_date <= '%s'
+	                                                          and phase = 'Post-Construction'
+	                                                          and public = TRUE
+	                                                          group by type"
+
+	todate_public_postcon_srt_prod <- dbGetQuery(prod, 
+	                                             paste(sprintf(todate_public_postcon_srt,
+	                                                           prod_end),
+	                                                   collapse=""))
+
+	#Assembling output table
+	public_postcon_srt <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+	public_postcon_srt$fy <- fy_public_postcon_srt_prod$count
+	public_postcon_srt$todate <- todate_public_postcon_srt_prod$count
+
+	colnames(public_postcon_srt)<- c("This Fiscal Year","To Date")
+	rownames(public_postcon_srt)<- fy_public_postcon_srt_prod$type
+
+	return(public_postcon_srt)
 
 	})
 
