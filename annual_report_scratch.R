@@ -233,7 +233,8 @@ table_5_3 <- reactive({
 	                                                   collapse=""))
 
 	#Assembling output table
-	public_postcon_srt <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+	public_postcon_srt <- data.frame("fy" = rep(NA, nrow(fy_public_postcon_srt_prod)), 
+																	 "todate" = rep(NA, nrow(fy_public_postcon_srt_prod)))
 	public_postcon_srt$fy <- fy_public_postcon_srt_prod$count
 	public_postcon_srt$todate <- todate_public_postcon_srt_prod$count
 
@@ -246,6 +247,48 @@ table_5_3 <- reactive({
 
 
 table_5_4 <- reactive({
+	#Public systems with post-construction srts this FY
+	fy_public_postcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+	                                    from fieldwork.viw_srt_full srt
+	                                    left join external.mat_assets sfc on srt.system_id = sfc.system_id
+	                                    where sfc.component_id is null
+	                                    and test_date >= '%s'
+	                                    and test_date <= '%s'
+	                                    and phase = 'Post-Construction'
+	                                    and public = TRUE
+	                                    group by sfc.asset_type"
+
+	fy_public_postcon_srt_systems_prod <-dbGetQuery(prod, 
+	                                                paste(sprintf(fy_public_postcon_srt_systems, 
+	                                                              prod_start, 
+	                                                              prod_end),
+	                                                      collapse=""))
+
+	#Public Systems with Post-Construction SRTs Performed TO DATE
+	todate_public_postcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+	                                                  from fieldwork.viw_srt_full srt
+	                                                  left join external.mat_assets sfc on srt.system_id = sfc.system_id
+	                                                  where sfc.component_id is null
+	                                                  and test_date <= '%s'
+	                                                  and phase = 'Post-Construction'
+	                                                  and public = TRUE
+	                                                  group by sfc.asset_type"
+
+	todate_public_postcon_srt_systems_prod <-dbGetQuery(prod, 
+	                                                    paste(sprintf(todate_public_postcon_srt_systems, 
+	                                                                  prod_end),
+	                                                          collapse=""))
+
+	Assembling output table
+	public_postcon_srt_bysystem <- data.frame("fy" = rep(NA, nrow(fy_public_postcon_srt_systems_prod)), 
+																						"todate" = rep(NA, nrow(fy_public_postcon_srt_systems_prod)))
+	public_postcon_srt_bysystem$fy <- fy_public_postcon_srt_systems_prod$count
+	public_postcon_srt_bysystem$todate <- todate_public_postcon_srt_systems_prod$count
+
+	colnames(public_postcon_srt_bysystem)<- c("This Fiscal Year","To Date")
+	rownames(public_postcon_srt_bysystem)<- fy_public_postcon_srt_systems_prod$
+
+	return(public_postcon_srt_bysystem)
 
 	})
 
