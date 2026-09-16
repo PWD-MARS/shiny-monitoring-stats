@@ -61,8 +61,8 @@ jscode <- 'window.onbeforeunload = function() { return "Please use the button on
 
 #0.2 source scripts.  ----
 #each script contains a module, which includes UI and server code
-source("monitoring_stats.R")
-source("quarterly_report.R")
+# source("monitoring_stats.R")
+# source("quarterly_report.R")
 source("annual_report_new.R")
 
 
@@ -115,12 +115,12 @@ server <- function(input, output, session) {
   current_fy <- lubridate::today() %m+% months(6) %>% year()
   
   #2.2: Server Module functions ---------------------------
-  #Stats
-  stats <- m_statsServer("stats", parent_session = session, current_fy = current_fy, poolConn = poolConn)
-
-  #Quarterly Report
-  q_report <- q_reportServer("q_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
-  
+  # #Stats
+  # stats <- m_statsServer("stats", parent_session = session, current_fy = current_fy, poolConn = poolConn)
+  # 
+  # #Quarterly Report
+  # q_report <- q_reportServer("q_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
+  # 
   #Annual report
   a_report <- a_reportServer("a_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
   

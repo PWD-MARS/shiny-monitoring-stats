@@ -136,7 +136,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         
         #Reactive table poplutions here-all outputs must be reactive dataframes
         
-        table_5_1 <- reactive({
+        public_postcon_cwl_table <- reactive({
           
           #Public sensors deployed this FY
           fy_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
@@ -214,7 +214,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_postcon_cwl)
         })
 
-        table_5_2 <- reactive({
+        public_systems_monitored_table <- reactive({
           #Public systems monitored by type todate
           todate_public_systems_monitored_bytype <- "select sfc.asset_type, count(distinct(d.smp_id)), d.public from
                                                             fieldwork.viw_deployment_full_cwl d
@@ -264,7 +264,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(todate_public_prod)
         })
 
-        table_5_3 <- reactive({
+        public_postcon_srt_table <- reactive({
           #Post-construction public SRTs this FY
           fy_public_postcon_srt <- "select count(*), type from fieldwork.viw_srt_full 
                                     where test_date >= '%s'
@@ -1096,9 +1096,9 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         })
         
         #reactable table outputs
-        output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction CWL Monitoring of Public SMPs Listed by Type` <- renderReactable(reactable(table_5_2(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction SRTs performed on Public Systems` <- renderReactable(reactable(table_5_3(), striped = TRUE, pagination = FALSE))
+        output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(public_postcon_cwl_table(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Public SMPs Listed by Type` <- renderReactable(reactable(public_systems_monitored_table(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction SRTs performed on Public Systems` <- renderReactable(reactable(public_postcon_srt_table(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Post-Construction SRTs Performed` <- renderReactable(reactable(table_5_4(), striped = TRUE, pagination = FALSE))
         output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(table_5_5(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(table_5_6(), striped = TRUE, pagination = FALSE))
@@ -1121,7 +1121,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$help_text <- renderText({
           paste("A Shiny App to Populate the Annual Report Stats" , 
                 "First Version Published on 08/05/2022 by Farshad Ebrahimi",
-                "Updated by Monica Gucciardi in September 2026"
+                "Updated by Monica Gucciardi in September 2026",
                 sep="\n")
         })
         
@@ -1132,9 +1132,9 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           },
           content = function(filename){
             
-            df_list <- list(table_5_1 = table_5_1(),
-                            table_5_2 = table_5_2(),
-                            table_5_3 = table_5_3(),
+            df_list <- list(public_postcon_cwl_table = public_postcon_cwl_table(),
+                            public_systems_monitored_table = public_systems_monitored_table(),
+                            public_postcon_srt_table = public_postcon_srt_table(),
                             table_5_4 = table_5_4(),
                             table_5_5 = table_5_5(),
                             table_5_6 = table_5_6(),
