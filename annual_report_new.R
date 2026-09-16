@@ -59,8 +59,8 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 reactableOutput(ns("Public Systems with Inlet Leakage Tests Administered")),
               br(),
                 
-              strong("Table 5-10: Public Systems with Inlet Conveyance Tests Administered"),
-                reactableOutput(ns("Public Systems with Inlet Conveyance Tests Administered")),
+              strong("Table 5-10: Public Systems with ICTs Administered"),
+                reactableOutput(ns("Public Systems with ICTs Administered")),
               br(),
                 
               strong("Table 5-11: Public Systems with Groundwater Monitoring"),
@@ -733,7 +733,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Inlet Conveyance Tests Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with ICTs Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
         output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
