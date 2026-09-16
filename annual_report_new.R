@@ -446,7 +446,11 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           public_midcon_srt_bysystem <- left_join(todate_public_midcon_srt_systems_prod,
                                           fy_public_midcon_srt_systems_prod,
                                           by = "asset_type",
-                                          suffix = c(".todate", ".fy"))
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(asset_type) |>
+          add_row(asset_type = "Total",
+            count.todate = sum(todate_public_midcon_srt_systems_prod$count),
+            count.fy = sum(fy_public_midcon_srt_systems_prod$count, na.rm = TRUE))
 
           rownames(public_midcon_srt_bysystem)<- public_midcon_srt_bysystem$asset_type
           public_midcon_srt_bysystem <- transmute(public_midcon_srt_bysystem,
