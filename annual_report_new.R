@@ -57,11 +57,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 5-9: Public Systems with Inlet Leakage Tests Administered"),
                 reactableOutput(ns("Public Systems with Inlet Leakage Tests Administered")),
-              br() #,
+              br(),
                 
-              # strong("Table 5-10: Inlet Conveyance Tests Performed on Public Systems"),
-              #   reactableOutput(ns("Inlet Conveyance Tests Performed on Public Systems")),
-              # br(),
+              strong("Table 5-10: Public Systems with Inlet Conveyance Tests Administered"),
+                reactableOutput(ns("Public Systems with Inlet Conveyance Tests Administered")),
+              br() #,
                 
               # strong("Table 5-11: Groundwater Monitoring for Public GSI"),
               #   reactableOutput(ns("Groundwater Monitoring for Public GSI")),
@@ -297,7 +297,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                        "To Date" = count.todate)
 
           return(public_postcon_srt)
-
         })
 
         table_5_4 <- reactive({
@@ -346,7 +345,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 
           return(public_postcon_srt_bysystem)
         })
-
 
         table_5_5 <- reactive({
 
@@ -558,7 +556,47 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                    "To Date" = todate)
 
           return(public_systems_leakage)
+        })
 
+        table_5_10 <- reactive({
+          #Public Systems with ICTs this fy
+          fy_public_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date >= '%s' and 
+                test_date <= '%s') ict"
+
+          fy_public_systems_ict_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(fy_public_systems_ict,
+                                                                 FYSTART_reactive(),
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Public Systems with ICTs to date
+          todate_public_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date <= '%s') ict"
+
+          todate_public_systems_ict_prod <- dbGetQuery(poolConn,
+                                                       paste(sprintf(todate_public_systems_ict,
+                                                                     FYEND_reactive()),
+                                                             collapse = ""))
+
+          #Assembling output table
+          public_systems_ict <- data.frame(fy = fy_public_systems_ict_prod$count, 
+                                   todate = todate_public_systems_ict_prod$count)
+
+          rownames(public_systems_ict) <- "Systems With ICTs Administered"
+          public_systems_ict <- transmute(public_systems_ict,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_systems_ict)
         })
         
         #reactable table outputs
@@ -571,7 +609,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
-        # output$`Inlet Conveyance Tests Performed on Public Systems` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Inlet Conveyance Tests Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         # output$`Groundwater Monitoring for Public GSI` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
         # output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
