@@ -69,11 +69,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-1: Summary of Post-Construction CWL Monitoring of Private Systems"),
                 reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Private Systems")),
-              br() #,
+              br(),
                 
-              # strong("Table 6-2: Post-Construction CWL Monitoring of Private Systems Listed by Type"),
-              #   reactableOutput(ns("Post-Construction CWL Monitoring of Private Systems Listed by Type")),
-              # br(),
+              strong("Table 6-2: Post-Construction CWL Monitoring of Private Systems Listed by Type"),
+                reactableOutput(ns("Post-Construction CWL Monitoring of Private Systems Listed by Type")),
+              br() #,
                 
               # strong("Table 6-3: Post-Construction SRTs performed on Private Systems"),
               #   reactableOutput(ns("Post-Construction SRTs performed on Private Systems")),
@@ -721,6 +721,53 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_postcon_cwl)
         })
 
+        table_6_2 <- reactive({
+          #Post-Construction Monitored private SMPs by type to date
+          todate_private_systems_monitored_bytype <- "select cr.\"smp_type\" as smp_type, count(distinct(d.smp_id)), d.public from
+                            fieldwork.viw_deployment_full_cwl d
+                            left join external.tbl_planreview_crosstab cr on d.smp_id = cr.\"smp_id\"::text
+                            where d.smp_id is not null
+                            and d.deployment_dtime < '%s'
+                            and d.public = false
+                            group by cr.\"smp_type\", d.public;"
+
+          todate_private_systems_monitored_bytype_prod <- dbGetQuery(poolConn, 
+                                                           paste(sprintf(todate_private_systems_monitored_bytype,
+                                                                         FYEND_reactive()),
+                                                                 collapse=""))
+
+          #Total constructed private SMPs to date
+          todate_constructed_private_systems_bytype <- "with sfc as (
+                                                    select distinct smp_id from external.mat_assets 
+                                                    where smp_id is not null
+                                                    and component_id is null
+                                                  ), pl as (
+                                                    select distinct \"SMPID\" from external.tbl_planreview_private
+                                                  ), cr as (
+                                                    select distinct smp_id, dcia_ft2, smp_type from external.tbl_planreview_crosstab
+                                                  )
+                                                  
+                                                  select count(*), cr.smp_type from pl 
+                                                  left join cr on pl.\"SMPID\"::text = cr.smp_id
+                                                  inner join sfc on pl.\"SMPID\"::text = sfc.smp_id
+                                                  where cr.dcia_ft2 is not null
+                                                  group by cr.smp_type"
+
+          todate_constructed_private_systems_bytype_prod<- dbGetQuery(poolConn, todate_constructed_private_systems_bytype)
+
+          #Assembling output table
+          todate_private_prod <- todate_constructed_private_systems_bytype_prod |>
+            left_join(todate_private_systems_monitored_bytype_prod, 
+                      by = "smp_type",
+                      suffix = c(".constructed", ".monitored")) |>
+            transmute(`SMP Type` = smp_type, 
+                      `Monitored SMPs` = replace_na(count.monitored, 0),
+                      `Total Constructed Private SMPs` = count.constructed)
+
+            return(todate_private_prod)
+
+        })
+
 
         
         #reactable table outputs
@@ -736,7 +783,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with ICTs Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
         output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
-        # output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
         # output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
