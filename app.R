@@ -47,7 +47,7 @@ options(DT.options = list(pageLength = 15))
 poolConn <- dbPool(RPostgres::Postgres(),
                       host = "PWDMARSDBS1.pwd.phila.local",
                       port = 5434,
-                      dbname = "mars_monica",
+                      dbname = "mars_prod",
                       user = Sys.getenv("shiny_uid"),
                       password = Sys.getenv("shiny_pwd")
 )
@@ -61,8 +61,8 @@ jscode <- 'window.onbeforeunload = function() { return "Please use the button on
 
 #0.2 source scripts.  ----
 #each script contains a module, which includes UI and server code
-# source("monitoring_stats.R")
-# source("quarterly_report.R")
+source("monitoring_stats.R")
+source("quarterly_report.R")
 source("annual_report_new.R")
 
 
@@ -92,9 +92,9 @@ ui <- function(req){
     useShinyjs(),
     navbarPage("Monitoring Stats",  id = "inTabset", theme = shinytheme("cerulean"),
       # #Stats
-      # m_statsUI("stats", current_fy = current_fy, years = years),
-      # #Quarterly Report
-      # q_reportUI("q_report", current_fy = current_fy, years = years),
+      m_statsUI("stats", current_fy = current_fy, years = years),
+      #Quarterly Report
+      q_reportUI("q_report", current_fy = current_fy, years = years),
       #Annual Report
       a_reportUI("a_report", current_fy = current_fy, years = years)
       
@@ -115,11 +115,11 @@ server <- function(input, output, session) {
   current_fy <- lubridate::today() %m+% months(6) %>% year()
   
   #2.2: Server Module functions ---------------------------
-  # #Stats
-  # stats <- m_statsServer("stats", parent_session = session, current_fy = current_fy, poolConn = poolConn)
-  # 
-  # #Quarterly Report
-  # q_report <- q_reportServer("q_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
+  #Stats
+  stats <- m_statsServer("stats", parent_session = session, current_fy = current_fy, poolConn = poolConn)
+
+  #Quarterly Report
+  q_report <- q_reportServer("q_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
   # 
   #Annual report
   a_report <- a_reportServer("a_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
