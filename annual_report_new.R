@@ -249,11 +249,11 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
             transmute(`SMP Type` = smp_smptype, 
                       `Monitored SMPs` = replace_na(count.monitored, 0),
                       `Total Constructed Public SMPs` = count.constructed,
-                      Description = NA)
+                      Note = NA)
 
-          #Add descriptions
-          todate_public_prod$Description[todate_public_prod$`SMP Type` == "Infiltration/Storage Trench"] <- "Also listed as Trench"
-          todate_public_prod$Description[todate_public_prod$`SMP Type` == "Permeable Pavement"] <- "Also listed as Pervious Paving"
+          #Add Notes
+          todate_public_prod$Note[todate_public_prod$`SMP Type` == "Infiltration/Storage Trench"] <- "Also listed as Trench"
+          todate_public_prod$Note[todate_public_prod$`SMP Type` == "Permeable Pavement"] <- "Also listed as Pervious Paving"
 
           return(todate_public_prod)
         })
