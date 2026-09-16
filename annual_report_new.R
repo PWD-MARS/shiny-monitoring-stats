@@ -255,7 +255,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                       suffix = c(".constructed", ".monitored")) |>
             arrange(smp_smptype) |>                                   #Sort alphabetically
             add_row(smp_smptype = "Total",
-              count.constructed = sum(todate_public_systems_constructed_bytype_prod$count), #No lazy eval in tibble::add_row()
+              count.constructed = sum(todate_public_systems_constructed_bytype_prod$count),
               count.monitored = sum(todate_public_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
             transmute(`SMP Type` = smp_smptype, 
                       `Monitored SMPs` = replace_na(count.monitored, 0),
@@ -346,7 +346,11 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           public_postcon_srt_bysystem <- left_join(todate_public_postcon_srt_systems_prod,
                                           fy_public_postcon_srt_systems_prod,
                                           by = "asset_type",
-                                          suffix = c(".todate", ".fy"))
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(asset_type) |>
+          add_row(asset_type = "Total",
+            count.todate = sum(todate_public_postcon_srt_systems_prod$count),
+            count.fy = sum(fy_public_postcon_srt_systems_prod$count, na.rm = TRUE))
 
           rownames(public_postcon_srt_bysystem)<- public_postcon_srt_bysystem$asset_type
           public_postcon_srt_bysystem <- transmute(public_postcon_srt_bysystem,
@@ -391,7 +395,11 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           public_midcon_srt <- left_join(todate_public_midcon_srt_prod,
                                           fy_public_midcon_srt_prod,
                                           by = "type",
-                                          suffix = c(".todate", ".fy"))
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(type) |>
+          add_row(type = "Total",
+            count.todate = sum(todate_public_midcon_srt_prod$count),
+            count.fy = sum(fy_public_midcon_srt_prod$count, na.rm = TRUE))
 
           rownames(public_midcon_srt)<- public_midcon_srt$type
           public_midcon_srt <- transmute(public_midcon_srt,
