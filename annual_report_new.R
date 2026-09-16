@@ -1121,6 +1121,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$help_text <- renderText({
           paste("A Shiny App to Populate the Annual Report Stats" , 
                 "First Version Published on 08/05/2022 by Farshad Ebrahimi",
+                "Updated by Monica Gucciardi in September 2026"
                 sep="\n")
         })
         
@@ -1131,7 +1132,26 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           },
           content = function(filename){
             
-            df_list <- list(Table_3_1=table_5_1())
+            df_list <- list(table_5_1 = table_5_1(),
+                            table_5_2 = table_5_2(),
+                            table_5_3 = table_5_3(),
+                            table_5_4 = table_5_4(),
+                            table_5_5 = table_5_5(),
+                            table_5_6 = table_5_6(),
+                            table_5_7 = table_5_7(),
+                            table_5_8 = table_5_8(),
+                            table_5_9 = table_5_9(),
+                            table_5_10 = table_5_10(),
+                            table_5_11 = table_5_11(),
+                            table_6_1 = table_6_1(),
+                            table_6_2 = table_6_2(),
+                            table_6_3 = table_6_3(),
+                            table_6_4 = table_6_4(),
+                            table_6_5 = table_6_5(),
+                            table_6_6 = table_6_6(),
+                            table_6_7 = table_6_7(),
+                            table_6_8 = table_6_8(),
+                            table_7_1 = table_7_1())
             write.xlsx(x = df_list , file = filename, rowNames = TRUE)
           }
         ) 
