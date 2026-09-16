@@ -248,9 +248,9 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                       by=c("smp_smptype" = "asset_type"), 
                       suffix = c(".constructed", ".monitored")) |>
             transmute(`SMP Type` = smp_smptype, 
-                      Description = NA,
                       `Monitored SMPs` = replace_na(count.monitored, 0),
-                      `Total Constructed Public SMPs` = count.constructed)
+                      `Total Constructed Public SMPs` = count.constructed,
+                      Description = NA)
 
           #Add descriptions
           todate_public_prod$Description[todate_public_prod$`SMP Type` == "Infiltration/Storage Trench"] <- "Also listed as Trench"
@@ -483,6 +483,41 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_cet)
 
         })
+
+        table_5_8 <- reactive({
+          #Public Systems with PP/PPSIRT in this fy
+          fy_public_pp <-"select count(distinct admin.fun_smp_to_system(smp_id))
+                                                from fieldwork.viw_porous_pavement_full
+                                                where test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+          fy_public_pp_prod <- dbGetQuery(poolConn, 
+                                          paste(sprintf(fy_public_pp, 
+                                                        FYSTART_reactive(), 
+                                                        FYEND_reactive()),
+                                                collapse=""))
+
+          #Public Systems with PP/PPSIRT to date
+          todate_public_pp <-"select count(distinct admin.fun_smp_to_system(smp_id))
+                                                    from fieldwork.viw_porous_pavement_full
+                                                    where test_date <= '%s'
+                                                    and public = TRUE"
+          todate_public_pp_prod <- dbGetQuery(poolConn, 
+                                              paste(sprintf(todate_public_pp, 
+                                                            FYEND_reactive()),
+                                                    collapse=""))
+
+          #Assembling output table
+          public_pp <- data.frame(fy = fy_public_pp_prod$count, 
+                                   todate = todate_public_pp_prod$count)
+
+          rownames(public_pp) <- "Systems With PP/SIRTs Administered"
+          public_pp <- transmute(public_pp,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_pp)
+        })
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -492,7 +527,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(table_5_5(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(table_5_6(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
-        # output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
         # output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
         # output$`Inlet Conveyance Tests Performed on Public Systems` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         # output$`Groundwater Monitoring for Public GSI` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
