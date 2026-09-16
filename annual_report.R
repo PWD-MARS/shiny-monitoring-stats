@@ -3,776 +3,1169 @@
 #Table will match what is in the quarterly report
 
 #1.0 UI --------
-  a_reportUI <- function(id, label = "a_report", current_fy, years){
-    ns <- NS(id)
-    tabPanel(title = "Annual Report", value = "a_report",
-    fluidPage(#theme = shinytheme("cerulean"),
-              titlePanel("Annual Report Counts"), 
-              #1.1 General Inputs
-              sidebarPanel(
-                fluidRow(column(12, selectInput(ns("fy"), "Fiscal Year (FY)", choices = years))
-                ),
-              #1.2 Buttons
+a_reportUI <- function(id, label = "a_report", current_fy, years){
+  ns <- NS(id)
+  tabPanel(title = "Annual Report", value = "a_report",
+           fluidPage(#theme = shinytheme("cerulean"),
+             titlePanel("Annual Report Counts"), 
+             #1.1 General Inputs
+             sidebarPanel(
+               fluidRow(column(12, selectInput(ns("fy"), "Fiscal Year (FY)", choices = years))
+               ),
+               #1.2 Buttons
                fluidRow(column(6,
-                              actionButton(ns("table_button"), "Generate Table")),
+                               actionButton(ns("table_button"), "Generate Table")),
                         column(6, 
                                shinyjs::disabled(downloadButton(ns("download_table"), "Download xlsx")))
-                         
-              ), width = 3),
-              #1.3 Main Panel (Outputs) -----
-                mainPanel(
-                 
-                  
-                  strong("Table 3-1: Summary of Post-Construction CWL Monitoring of Public SMPs"),
-                  reactableOutput(ns("Table 3-1")),
-                  strong("Table 3-2: Post-Construction CWL Monitoring of Public SMPs Listed by Type "),
-                  reactableOutput(ns("Table 3-2")),
-                  strong("Table 3-3: Post-Construction SRTs performed on Public Systems"),
-                  reactableOutput(ns("Table 3-3")),
-                  strong("Table 3-4: Public Systems with Post-Construction SRTs Performed"),
-                  reactableOutput(ns("Table 3-4")),
-                  strong("Table 3-5: Public Systems with CETs Administered"),
-                  reactableOutput(ns("Table 3-5")),
-                  strong("Table 3-6: Public Systems with Infiltration Testing Administered"),
-                  reactableOutput(ns("Table 3-6")),
-                  strong("Table 3-7: Construction-Phase SRTs Performed on Public Systems"),
-                  reactableOutput(ns("Table 3-7")),
-                  strong("Table 3-8: Public Systems with Construction-Phase SRTs Performed"),
-                  reactableOutput(ns("Table 3-8")),
-                  strong("Table 3-9: Groundwater Monitoring for Public GSI"),
-                  reactableOutput(ns("Table 3-9")),
-                  strong("Table 3-10: Summary of Post-Construction CWL Monitoring of Private SMPs"),
-                  reactableOutput(ns("Table 3-10")),
-                  strong("Table 3-11: Post-Construction CWL-Monitoring of Private SMPs Listed by Type "),
-                  reactableOutput(ns("Table 3-11")),
-                  strong("Table 3-12: Post-Construction SRTs performed on Private Systems"),
-                  reactableOutput(ns("Table 3-12")),
-                  strong("Table 3-13: Private SMPs with Post-Construction SRTs Performed"),
-                  reactableOutput(ns("Table 3-13")),
-                  strong("Table 3-14: Private Systems with CETs Administered"),
-                  reactableOutput(ns("Table 3-14"))
-          
-                  
-                )
-    )
-    )
-    
-  }
+                        
+               ), width = 3),
+             #1.3 Main Panel (Outputs) -----
+             mainPanel(
+               
+               
+              strong("Summary of Post-Construction CWL Monitoring of Public SMPs"),
+                reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Public SMPs")),
+                br(),
+                
+              strong("Post-Construction CWL Monitoring of Public SMPs Listed by Type"),
+                reactableOutput(ns("Post-Construction CWL Monitoring of Public SMPs Listed by Type")),
+                br(),
+                
+              strong("Post-Construction SRTs performed on Public Systems"),
+                reactableOutput(ns("Post-Construction SRTs performed on Public Systems")),
+                br(),
+                
+              strong("Public Systems with Post-Construction SRTs Performed"),
+                reactableOutput(ns("Public Systems with Post-Construction SRTs Performed")),
+                br(),
+                
+              strong("Construction-Phase SRTs Performed on Public Systems"),
+                reactableOutput(ns("Construction-Phase SRTs Performed on Public Systems")),
+                br(),
+                
+              strong("Public Systems with Construction-Phase SRTs Performed"),
+                reactableOutput(ns("Public Systems with Construction-Phase SRTs Performed")),
+                br(),
+                
+              strong("Public Systems with CETs Administered"),
+                reactableOutput(ns("Public Systems with CETs Administered")),
+                br(),
+                
+              strong("Public Systems with Infiltration Testing Administered"),
+                reactableOutput(ns("Public Systems with Infiltration Testing Administered")),
+                br(),
+                
+              strong("Public Systems with Inlet Leakage Tests Administered"),
+                reactableOutput(ns("Public Systems with Inlet Leakage Tests Administered")),
+              br(),
+                
+              strong("Public Systems with ICTs Administered"),
+                reactableOutput(ns("Public Systems with ICTs Administered")),
+              br(),
+                
+              strong("Public Systems with Groundwater Monitoring"),
+                reactableOutput(ns("Public Systems with Groundwater Monitoring")),
+              br(),
+                
+              strong("Summary of Post-Construction CWL Monitoring of Private Systems"),
+                reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Private Systems")),
+              br(),
+                
+              strong("Post-Construction CWL Monitoring of Private Systems Listed by Type"),
+                reactableOutput(ns("Post-Construction CWL Monitoring of Private Systems Listed by Type")),
+              br(),
+                
+              strong("Post-Construction SRTs performed on Private Systems"),
+                reactableOutput(ns("Post-Construction SRTs performed on Private Systems")),
+              br(),
+                
+              strong("Private SMPs with Post-Construction SRTs Performed"),
+                reactableOutput(ns("Private SMPs with Post-Construction SRTs Performed")),
+              br(),
+                
+              strong("Private Systems with CETs Administered"),
+                reactableOutput(ns("Private Systems with CETs Administered")),
+              br(),
+                
+              strong("Private Systems with Inlet Leakage Tests Administered"),
+                reactableOutput(ns("Private Systems with Inlet Leakage Tests Administered")),
+              br(),
+
+              strong("Private Systems with ICTs Administered"),
+                reactableOutput(ns("Private Systems with ICTs Administered")),
+              br(),
+                
+              strong("Private Systems with WWIs Administered"),
+                reactableOutput(ns("Private Systems with WWIs Administered")),
+                br(),
+
+              strong("Collection System Dye Tests Administered"),
+                reactableOutput(ns("Collection System Dye Tests Administered"))
+             )
+           )
+  )
   
+}
+
 #2.0 Server -----
-  a_reportServer <- function(id, parent_session, current_fy, poolConn){
-    moduleServer(
-      id, 
-      function(input, output, session){
+a_reportServer <- function(id, parent_session, current_fy, poolConn){
+  moduleServer(
+    id, 
+    function(input, output, session){
+      
+      #reactive FY start and END
+      FYSTART_reactive <- reactive({
+        fystart_string <-"%s-07-01 00:00:00"
+        FYSTART <- paste(sprintf(fystart_string, as.character(as.numeric(input$fy)-1)),collapse="")
+        return(FYSTART)
+      })
+      
+      FYEND_reactive <- reactive({
+        fyend_string <-"%s-06-30 11:59:59"
+        FYEND <- paste(sprintf(fyend_string, input$fy),collapse="")
+        return(FYEND)
+      })
+      
+      
+      
+      #2.2 observe event --------
+      observeEvent(input$table_button, {
         
-        #reactive FY start and END
-        FYSTART_reactive <- reactive({
-          fystart_string <-"%s-07-01 00:00:00"
-          FYSTART <- paste(sprintf(fystart_string, as.character(as.numeric(input$fy)-1)),collapse="")
-          return(FYSTART)
+        #enable downloading after table in generated
+        enable("download_table")
+        
+        #Reactive table poplutions here-all outputs must be reactive dataframes
+        
+        public_postcon_cwl <- reactive({
+          
+          #Public sensors deployed this FY
+          fy_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+                            where (collection_dtime > '%s' OR collection_dtime is null)
+                            and deployment_dtime between '%s' and '%s'
+                            and public =  TRUE"
+          
+          fy_public_sensors_deployed_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_sensors_deployed, 
+                                                                            FYSTART_reactive(),
+                                                                            FYSTART_reactive(), 
+                                                                            FYEND_reactive()),
+                                                                    collapse="")) 
+          
+          #Public systems monitored this FY
+          fy_public_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) 
+		                                from fieldwork.viw_deployment_full_cwl d
+		                                where d.public = true and
+		                                (deployment_dtime between '%s' and '%s'
+		                                or collection_dtime between '%s' and '%s'
+		                                or (deployment_dtime < '%s' and collection_dtime is null))"
+          fy_public_systems_monitored_prod <- dbGetQuery(poolConn, 
+                                                         paste(sprintf(fy_public_systems_monitored, 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive(), 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive(), 
+                                                                       FYSTART_reactive()), 
+                                                               collapse="")) 
+          
+          #Public systems newly monitored this FY
+          fy_public_systems_newly_monitored <- "select count(*) from 
+		                                  fieldwork.viw_first_deployment_cwl f where
+		                                  public = true and
+		                                  first_deployment between '%s' and '%s'"
+          
+          fy_public_systems_newly_monitored_prod <- dbGetQuery(poolConn, 
+                                                               paste(sprintf(fy_public_systems_newly_monitored, 
+                                                                             FYSTART_reactive(), 
+                                                                             FYEND_reactive()),
+                                                                     collapse=""))
+          
+          #Sensors deployed to date
+          todate_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+	                                                  where deployment_dtime <= '%s'
+	                                                  and public = TRUE"
+          
+          todate_public_sensors_deployed_prod <- dbGetQuery(poolConn, paste(sprintf(todate_public_sensors_deployed,
+                                                                                FYEND_reactive()),
+                                                                        collapse=""))
+          
+          #Public systems monitored to date
+          todate_public_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) 
+	                                          from fieldwork.viw_deployment_full_cwl d
+	                                          where deployment_dtime <= '%s'
+	                                          and d.public = true"
+          
+          todate_public_systems_monitored_prod <- dbGetQuery(poolConn, 
+                                                             paste(sprintf(todate_public_systems_monitored,
+                                                                           FYEND_reactive()),
+                                                                   collapse=""))
+          
+          #Assembling output table
+          public_postcon_cwl <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+          public_postcon_cwl$fy <- c(fy_public_sensors_deployed_prod$count, #Public sensors deployed
+                                     fy_public_systems_monitored_prod$count, #Public systems monitored
+                                     fy_public_systems_newly_monitored_prod$count) #Public systems newly monitored
+          
+          public_postcon_cwl$todate <- c(todate_public_sensors_deployed_prod$count, #Public sensors deployed
+                                         todate_public_systems_monitored_prod$count, #Public systems monitored
+                                         NA) #Public systems newly monitored is only defined for the FY
+          
+          colnames(public_postcon_cwl)<- c("This Fiscal Year","To Date")
+          rownames(public_postcon_cwl)<-c("Sensors Deployed","Systems Monitored","Systems Newly Monitored")
+          
+          return(public_postcon_cwl)
         })
-        
-        FYEND_reactive <- reactive({
-          fyend_string <-"%s-06-30 11:59:59"
-          FYEND <- paste(sprintf(fyend_string, input$fy),collapse="")
-          return(FYEND)
-        })
-        
-        
-        
-        #2.2 observe event --------
-        observeEvent(input$table_button, {
-          
-          #enable downloading after table in generated
-          enable("download_table")
-          
-          #Reactive table poplutions here-all outputs must be reactive dataframes
-          
-          table_31 <- reactive({
-            
-            ## queries to gets stats
-            #Section 3.1: Post-Construction GSI Monitoring + Testing
-            #Section 3.1.1: CWL Monitoring
-            #Sensors deployed this fiscal year
-            #In the text, and in table 3.1
-            
-            sql_string_1 <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where (collection_dtime > '%s' OR collection_dtime is null)
-                                  and deployment_dtime between '%s' and '%s'
-                                  and public =  TRUE"
-            table_3_1_public_sensors_deployed_postcon <- dbGetQuery(poolConn, paste(sprintf(sql_string_1, FYSTART_reactive(),FYSTART_reactive(), FYEND_reactive()),collapse="")) 
-            
-            ##Public systems monitored this fiscal year
-            #In the text, and in table 3.1
-    
-            sql_string_2 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                            where d.public = true and
-                                            (deployment_dtime between '%s' and '%s'
-                                            or collection_dtime between '%s' and '%s'
-                                            or (deployment_dtime < '%s' and collection_dtime is null))"
-            
-            table_3_1_public_systems_monitored <- dbGetQuery(poolConn, paste(sprintf(sql_string_2, FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive()), collapse="")) 
-            
-            
-            #Newly monitored systems this fiscal year
-            #In the text, and in table 3.1
-            sql_string_3 <- "select count(*) from fieldwork.viw_first_deployment_cwl f where
-                  public = true and
-                  first_deployment between '%s' and '%s'"
-            table_3_1_public_new_systems_monitored<- dbGetQuery(poolConn, paste(sprintf(sql_string_3, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            
-            #Sensors deployed to date
-            sql_string_4 <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                                where deployment_dtime <= '%s'
-                                                and public = TRUE"
-            
-            table_3_1_public_sensors_deployed_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_4,FYEND_reactive()),collapse=""))
-            
-            #Public systems monitored to date
-            #In the text, and in table 3.1
-            sql_string_5 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                                where deployment_dtime <= '%s'
-                                                and d.public = true"
-            table_3_1_public_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_5,FYEND_reactive()),collapse=""))
-            
-            
-            `This Fiscal Year`<- data.frame(c(pull(table_3_1_public_sensors_deployed_postcon),pull(table_3_1_public_systems_monitored),pull(table_3_1_public_new_systems_monitored)))
-            `To Date`<-data.frame(c(pull(table_3_1_public_sensors_deployed_todate),pull(table_3_1_public_systems_monitored_todate),NA))
-            table_3_1 <- bind_cols(`This Fiscal Year`,`To Date`)
-            colnames(table_3_1)<- c("This Fiscal Year","To Date")
-            rownames(table_3_1)<-c("Sensors Deployment","Systems","Systems Newly Monitored")
-            table_3_1$Description <- c("Number of Sensor deployments, Doesn't include SRTs, Can Include duplicated sensor ids","Public systems with CWL data","Systems first deployed during this fiscal year")
-            
-            table_3_1 <- table_3_1 %>%
-              select(Description, `This Fiscal Year`, `To Date`)
-            
-            return(table_3_1)
-            
-            
-          })
-          
-          table_32 <- reactive({
-            
-            #Monitored public smps by type, to date
-            #Table 3-2 first column
-            sql_string_6 <- "select sfc.asset_type, count(distinct(d.smp_id)), d.public from
-                                                fieldwork.viw_deployment_full_cwl d
-                                                left join external.mat_assets sfc on d.smp_id = sfc.smp_id
-                                                where sfc.component_id is null
-                                                and d.smp_id is not null
-                                                and d.deployment_dtime < '%s'
-                                                and d.public = true
-                                                group by sfc.asset_type, d.public"
-            
-            table_3_2_public_smp_bytype_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_6,FYEND_reactive()),collapse=""))
-            
-            #cipit statuses indicating constructed systems are Jillian Simmons's best recommendation
-            #Table 3-2 second column
-            sql_string_7 <- "select count(*), smp_smptype from external.tbl_smpbdv g where g.smp_notbuiltretired is null 
-                                            and (g.cipit_status = 'Closed' 
-                                            or g.cipit_status = 'Construction-Substantially Complete' 
-                                            or g.cipit_status = 'Construction-Contract Closed') 
-                                            group by smp_smptype"
-            table_3_2_public_constructed_systems_total <- dbGetQuery(poolConn,sql_string_7)
-            
-            table_3_2_public_smp_bytype_todate <- table_3_2_public_smp_bytype_todate %>%
-              select(`SMP Type` = asset_type,`Monitored SMPs`=count) 
-            table_3_2_public_smp_bytype_todate[table_3_2_public_smp_bytype_todate[,"SMP Type"] == "Trench",1] <- "Infiltration/Storage Trench"
-            
-            
-            table_3_2_public_constructed_systems_total <- table_3_2_public_constructed_systems_total %>%
-              select(`SMP Type` = smp_smptype,`Total Constructed Public SMPs`=count) 
-            table_3_2_public_constructed_systems_total[table_3_2_public_constructed_systems_total[,"SMP Type"] == "Pervious Paving",1] <- "Permeable Pavement"
-            table_3_2 <- table_3_2_public_constructed_systems_total %>% 
-              left_join(table_3_2_public_smp_bytype_todate, by="SMP Type")
-            table_3_2<-table_3_2[,c(1,3,2)]
-            
-            #Replace NA with zero
-            table_3_2[is.na(table_3_2)] <-  0
-            
-            table_3_2$Description <- NA
-            table_3_2 <- table_3_2 %>%
-              select(`SMP Type`, Description,`Total Constructed Public SMPs`, `Monitored SMPs`)
-            
-            table_3_2[table_3_2[,"SMP Type"] == "Infiltration/Storage Trench", 2] <- "Also listed as Trench"
-            table_3_2[table_3_2[,"SMP Type"] == "Permeable Pavement", 2] <- "Also listed as Pervious Paving"
-            
-            return(table_3_2)
-            
-          })
-          
-          
-          table_33 <- reactive({
-            
-            #Section 3.1.2: SRT Testing
-            #Table 3-3
-            #Post-construction SRTs performed on Public Systems
-            #Also appears in the 3.1.2 opening paragraph
-            #First column: This fiscal year
-            
-            sql_string_8 <- "select count(*), type from fieldwork.viw_srt_full 
-                                      where test_date >= '%s'
-                                      and test_date <= '%s'
-                                      and phase = 'Post-Construction'
-                                      and public = TRUE
-                                      group by type"
-            table_3_3_public_system_postcon_srt <-dbGetQuery(poolConn, paste(sprintf(sql_string_8, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            
-            #Post-construction SRTs performed on Public Systems TO DATE
-            #Second column: The above, to date
-            
-            sql_string_9 <-"select count(*), type from fieldwork.viw_srt_full 
-                                                        where test_date <= '%s'
-                                                        and phase = 'Post-Construction'
-                                                        and public = TRUE
-                                                        group by type"
-            
-            table_3_3_public_system_postcon_srt_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_9,FYEND_reactive()),collapse=""))
-            
-            
-            
-            table_3_3 <- table_3_3_public_system_postcon_srt_todate %>%
-              left_join(table_3_3_public_system_postcon_srt, by="type") %>%
-              select(`SRT Type`=type,`This Fiscal Year`=count.y, `To Date`=count.x)
-            table_3_3[is.na(table_3_3)] <-  0
-            
-            
-            return(table_3_3)
-            
-          })
-          
-          table_34 <- reactive({
-            
-            #Table 3.4: Public Systems with Post-Construction SRTs Performed
-            #Note: This is a count of systems, not SMPs. The table title and caption for the table in the FY21 annual report implies that it is counting SMPs.
-            #The numbers in the old table are systems, not SMPs, and were generated by this query
-            #I suggest we rename the table to be counting systems, and remove the caption
-            #We could just as easily count SMPs, by replacing the count(distinct(srt.system_id)) with count(distinct(sfc.smp_id))
-            
-            #Column 1: Current fiscal year
-            sql_string_10 <-"select sfc.asset_type, count(distinct(srt.system_id))
-                                                  from fieldwork.viw_srt_full srt
-                                                  left join external.mat_assets sfc on srt.system_id = sfc.system_id
-                                                  where sfc.component_id is null
-                                                  and test_date >= '%s'
-                                                  and test_date <= '%s'
-                                                  and phase = 'Post-Construction'
-                                                  and public = TRUE
-                                                  group by sfc.asset_type"
-            
-            table_3_4_public_systems_postcon_srt <-dbGetQuery(poolConn, paste(sprintf(sql_string_10, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #Public Systems with Post-Construction SRTs Performed TO DATE
-            #Column 2: 
-            sql_string_11 <-"select sfc.asset_type, count(distinct(srt.system_id))
-                                                  from fieldwork.viw_srt_full srt
-                                                  left join external.mat_assets sfc on srt.system_id = sfc.system_id
-                                                  where sfc.component_id is null
-                                                  and test_date <= '%s'
-                                                  and phase = 'Post-Construction'
-                                                  and public = TRUE
-                                                  group by sfc.asset_type"
-            table_3_4_public_systems_postcon_srt_todate <-dbGetQuery(poolConn, paste(sprintf(sql_string_11, FYEND_reactive()),collapse=""))
-            
-            
-            table_3_4 <- table_3_4_public_systems_postcon_srt_todate %>%
-              left_join(table_3_4_public_systems_postcon_srt, by="asset_type")
-            table_3_4 <- table_3_4[,c(1,3,2)]
-            colnames(table_3_4) <- c("SMP Type","This Fiscal Year","To Date")
-            table_3_4[is.na(table_3_4)] <-  0
-            
-            return(table_3_4)
-            
-            
-          })
-          
-          table_35 <- reactive({
-            
-            #Section 3.1.3: CET Testing
-            #Table 3.5 and the 3.1.3 paragraph
-            #Column 1: Public systems with CET this fiscal year
-            
-            sql_string_12 <-"select count(distinct system_id) 
-                                      from fieldwork.viw_capture_efficiency_full 
-                                      where phase = 'Post-Construction'
-                                      and test_date >= '%s'
-                                      and test_date <= '%s'
-                                      and public = TRUE"
-            table_3_5_public_systems_cet <- dbGetQuery(poolConn, paste(sprintf(sql_string_12, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #Public systems with CET  TO DATE
-            #Column 2: 
-            
-            sql_string_13 <-"select count(distinct system_id) 
-                                      from fieldwork.viw_capture_efficiency_full 
-                                      where phase = 'Post-Construction'
-                                      and test_date <= '%s'
-                                      and public = TRUE"
-            table_3_5_public_systems_cet_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_13,FYEND_reactive()),collapse=""))
-            
-            table_3_5_public_systems_cet["To Date"] <-table_3_5_public_systems_cet_todate
-            table_3_5 <-table_3_5_public_systems_cet
-            colnames(table_3_5) <- c("This Fiscal Year","To Date")
-            rownames(table_3_5) <- "Number of Systems with CETs Administered"
-            
-            
-            return(table_3_5) 
-          })
-          
-          table_36 <- reactive({
-            #Section 3.1.4: Porous Pavement and PPSIRT
-            #Table 3.6 and in the 3.1.4 paragraph
-            #Column 1: Systems with PP/PPSIRT in this fiscal year
-            
-            
-            sql_string_14 <-"select count(distinct admin.fun_smp_to_system(smp_id))
-                                      from fieldwork.viw_porous_pavement_full
-                                      where test_date >= '%s'
-                                      and test_date <= '%s'
-                                      and public = TRUE"
-            table_3_6_systems_pp_ppsirt <- dbGetQuery(poolConn, paste(sprintf(sql_string_14, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #Systems with PP/PPSIRT in this fiscal year TO DATE
-            #column 2
-            sql_string_15 <-"select count(distinct admin.fun_smp_to_system(smp_id))
-                                          from fieldwork.viw_porous_pavement_full
-                                          where test_date <= '%s'
-                                          and public = TRUE"
-            table_3_6_systems_pp_ppsirt_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_15, FYEND_reactive()),collapse=""))
-            
-            table_3_6_systems_pp_ppsirt["To Date"] <- table_3_6_systems_pp_ppsirt_todate
-            table_3_6 <- table_3_6_systems_pp_ppsirt
-            colnames(table_3_6)<- c("This Fiscal Year","To Date")
-            rownames(table_3_6)<- "Number of Systems with Infiltration Testing Administered"
-            
-            return(table_3_6) 
-            
-          })
-          
-          
-          table_37 <- reactive({
-            
-            
-            #Section 3.2: Public GSI Monitoring during Construction
-            #3.2.1 SRTs in Construction
-            
-            #Table 3.7, and also the opening paragraph
-            #Mid-construction SRTs performed on Public Systems
-            #First column: This fiscal year
-            
-            sql_string_16 <- "select count(*), type
-                            from fieldwork.viw_srt_full 
-                            where test_date >= '%s'
-                            and test_date <= '%s'
-                            and phase = 'Construction'
-                            and public = TRUE
-                            group by type"
-            
-            
-            
-            table_3_7_public_midcon_srt <- dbGetQuery(poolConn, paste(sprintf(sql_string_16, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #Second column: The above, to date
-            sql_string_17 <- "select count(*), type
-                          from fieldwork.viw_srt_full 
-                          where test_date <= '%s'
-                          and phase = 'Construction'
-                          and public = TRUE
-                          group by type"
-            
-            table_3_7_public_midcon_srt_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_17, FYEND_reactive()),collapse=""))
-            
-            table_3_7 <- table_3_7_public_midcon_srt_todate %>%
-              left_join(table_3_7_public_midcon_srt, by="type") %>%
-              select(`SRT Type`=type,`This Fiscal Year`=count.y, `To Date`=count.x)
-            table_3_7[is.na(table_3_7)] <-  0
-            
-            
-            return(table_3_7) 
-            
-          })
-          
-          table_38 <- reactive({
-            #Table 3.8, and the opening paragraph
-            #Note: This is a count of systems, not SMPs. The table title and caption for the table in the FY21 annual report implies that it is counting SMPs.
-            #The numbers in the old table are systems, not SMPs, and were generated by this query
-            #I suggest we rename the table to be counting systems, and remove the caption
-            #We could just as easily count SMPs, by replacing the count(distinct(srt.system_id)) with count(distinct(sfc.smp_id))
-            #Column 1: Current fiscal year
-            
-            
-            sql_string_18 <-"select sfc.asset_type, count(distinct(srt.system_id))
-                              from fieldwork.viw_srt_full srt
-                              left join external.mat_assets sfc on srt.system_id = sfc.system_id
-                              where sfc.component_id is null
-                              and test_date >= '%s'
-                              and test_date <= '%s'
-                              and phase = 'Construction'
-                              and public = TRUE
-                              group by sfc.asset_type"
-            table_3_8_public_systems_duringcon_srt <- dbGetQuery(poolConn, paste(sprintf(sql_string_18, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #SRTs in Construction (count of systems) TO DATE
-            sql_string_19 <-"select sfc.asset_type, count(distinct(srt.system_id))
-                              from fieldwork.viw_srt_full srt
-                              left join external.mat_assets sfc on srt.system_id = sfc.system_id
-                              where sfc.component_id is null
-                              and test_date <= '%s'
-                              and phase = 'Construction'
-                              and public = TRUE
-                              group by sfc.asset_type"
-            table_3_8_public_systems_duringcon_srt_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_19,FYEND_reactive()),collapse=""))
-            
-            table_3_8 <- table_3_8_public_systems_duringcon_srt_todate %>%
-              left_join(table_3_8_public_systems_duringcon_srt, by="asset_type") 
-            table_3_8[is.na(table_3_8)] <-  0
-            table_3_8 <- table_3_8[,c(1,3,2)]
-            colnames(table_3_8) <- c("System Type","This Fiscal Year", "To Date")
-            
-            
-            return(table_3_8) 
-            
-          })
-          
-          
-          table_39 <- reactive({
-            
-            #Section 3.3 Groundwater Level Monitoring for Public GSI
-            #Table 3.9 and the opening paragraph
-            #First column, first row - GW monitoring prior to construction of GSI this fiscal year
-            
-            sql_string_20 <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
-                                                and deployment_dtime <= '%s'
-                                                and (collection_dtime >= '%s' OR collection_dtime is null)
-                                                and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
-            table_3_9_public_gw_monitoring_precon <- dbGetQuery(poolConn, paste(sprintf(sql_string_20, FYEND_reactive(), FYSTART_reactive()),collapse=""))
-            
-            #GW monitoring prior to construction of GSI TO THIS DATE 
-            #Second column, first row - the same, to date
-            sql_string_21 <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
-                                                and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
-            table_3_9_public_gw_monitoring_precon_todate <- dbGetQuery(poolConn, sql_string_21)
-            
-            #Post-construction GW monitoring at GSI this fiscal year
-            #First column, second row 
-            sql_string_22 <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
-                                                and deployment_dtime <= '%s'
-                                                and (collection_dtime >= '%s' OR collection_dtime is null)
-                                                and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
-            table_3_9_public_gw_monitoring_postcon <- dbGetQuery(poolConn, paste(sprintf(sql_string_22, FYEND_reactive(), FYSTART_reactive()),collapse=""))
-            
-            
-            #Post-construction GW monitoring at GSI TO THIS DATE
-            #Second column, second row - the same, to date
-            sql_string_23 <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
-                                                                        and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
-            table_3_9_public_gw_monitoring_postcon_todate <- dbGetQuery(poolConn, sql_string_23)
-            
-            table_3_9_public_gw_monitoring_precon["To Date"] <- table_3_9_public_gw_monitoring_precon_todate
-            table_3_9_public_gw_monitoring_postcon["To Date"] <- table_3_9_public_gw_monitoring_postcon_todate
-            table_3_9 <- bind_rows(table_3_9_public_gw_monitoring_precon,table_3_9_public_gw_monitoring_postcon)
-            rownames(table_3_9) <- c("Prior to Construction of GSI (Systems)","Post-Construction (Active GSI)")
-            colnames(table_3_9) <- c("This Fiscal Year","To Date")
-            
-            return(table_3_9)
-          })
-          
-          table_310 <- reactive({
-            
-            #Section 3.4: Post-Construction Private GSI Monitoring and Testing
-            #Section 3.4.1: Private CWL Monitoring
-            #Table 3.10, and also the opening paragraph
-            #First column, first row - Sensor deployments this fiscal year
-            
-            sql_string_24 <-  "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where (collection_dtime > '%s' OR collection_dtime is null)
-                                  and deployment_dtime between '%s' and '%s'
-                                  and public = FALSE"
-            
-            table_3_10_private_sensors_deployed <- dbGetQuery(poolConn, paste(sprintf(sql_string_24, FYSTART_reactive(), FYSTART_reactive(), FYEND_reactive()),collapse="")) 
-            
-            #Second column, first row - Sensor deployments to date (private)
-            sql_string <- "select count(*) from fieldwork.viw_deployment_full_cwl
-                                  where deployment_dtime < '%s'
-                                  and public = FALSE"
-            
-            table_3_10_private_sensors_deployed_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string,FYEND_reactive()),collapse="")) 
-            
-            #Systems monitored this fiscal year (private)
-            #First column, second row - Systems monitored this fiscal year
-            
-            sql_string_25 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                  where deployment_dtime between '%s' and '%s'
-                                  and (collection_dtime >= '%s'
-                                      or collection_dtime is null) 
-                                  and d.public = false"
-            table_3_10_private_systems_monitored <- dbGetQuery(poolConn, paste(sprintf(sql_string_25, FYSTART_reactive(), FYEND_reactive(), FYSTART_reactive()),collapse="")) 
-            
-            #Systems monitored to date (private)
-            sql_string_26 <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
-                                  where deployment_dtime <= '%s'
-                                  and d.public = false"
-            table_3_10_private_systems_monitored_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_26, FYEND_reactive()),collapse="")) 
-            
-            #Newly monitored systems this fiscal year (private)
-            sql_string_27 <-"select count(distinct admin.fun_smp_to_system(newdeployments.smp_id)) FROM 
-                                          	(select d.smp_id FROM fieldwork.viw_deployment_full_cwl d 
-                                               group BY d.smp_id, d.public
-                                               having min(d.deployment_dtime) > '%s'
-                                               and min(d.deployment_dtime) <= '%s'
-                                               and d.public = false) newdeployments"
-            table_3_10_private_new_systems_monitored<- dbGetQuery(poolConn, paste(sprintf(sql_string_27, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            
-            `This Fiscal Year`<- data.frame(c(pull(table_3_10_private_sensors_deployed),pull(table_3_10_private_systems_monitored ),pull( table_3_10_private_new_systems_monitored)))
-            `To Date`<-data.frame(c(pull(table_3_10_private_sensors_deployed_todate),pull(table_3_10_private_systems_monitored_todate),NA))
-            table_3_10 <- bind_cols(`This Fiscal Year`,`To Date`)
-            colnames(table_3_10)<- c("This Fiscal Year","To Date")
-            rownames(table_3_10)<-c("Sensors Deployments","Systems","Systems Newly Monitored")
-            
-            
-            table_3_10$Description <- NA
-            table_3_10 <- table_3_10 %>%
-              select(Description,`This Fiscal Year`, `To Date`)
-            
-            table_3_10$Description <- c("Number of Sensor deployments, Doesn't include SRTs, Can Include duplicated sensor ids","Private systems with CWL data","Private systems first deployed during this fiscal year")
-            
-            
-            return(table_3_10)
-            
-          })
-          
-          
-          table_311 <- reactive({
-            
-            #Table 3.11: Post-Construction CWL-Monitoring of Private SMPs Listed by Type 
-            #First column: Monitored private SMPs to date
-            
-            sql_string_29 <- "select cr.\"smp_type\", count(distinct(d.smp_id)), d.public from
-                  fieldwork.viw_deployment_full_cwl d
-                  left join external.tbl_planreview_crosstab cr on d.smp_id = cr.\"smp_id\"::text
-                  where d.smp_id is not null
-                  and d.deployment_dtime < '%s'
-                  and d.public = false
-                  group by cr.\"smp_type\", d.public;"
-            
-            table_3_11_private_monitored_smps_postcon<- dbGetQuery(poolConn, paste(sprintf(sql_string_29,FYEND_reactive()),collapse=""))
-            
-            
-            #Second column: Total constructed private SMPs
-            
-            
-            # sql_string_30 <- "select count(*), cr.\"smp_type\"
-            #       from external.tbl_planreview_projectsmpconcat pl
-            #       left join external.tbl_planreview_designation de on de.\"ProjectID\" = pl.project_id
-            #       left join external.tbl_planreview_crosstab cr on de.\"smp_id\" = cr.\"smp_id\"
-            #       left join external.mat_assets sfc on de.\"smp_id\"::text = sfc.smp_id
-            #       where cr.\"DCIA\" is not null
-            #       and sfc.smp_id is not null
-            #       and sfc.component_id is null
-            #       group by cr.\"smp_type\";"
-            
-            
-            # updated query reflecting changes in database tables
-            sql_string_30 <- "with sfc as (
-                                        	select distinct smp_id from external.mat_assets 
-                                        	where smp_id is not null
-                                        	and component_id is null
-                                        ), pl as (
-                                        	select distinct \"SMPID\" from external.tbl_planreview_private
-                                        ), cr as (
-                                        	select distinct smp_id, dcia_ft2, smp_type from external.tbl_planreview_crosstab
-                                        )
-                                        
-                                        select count(*), cr.smp_type from pl 
-                                        left join cr on pl.\"SMPID\"::text = cr.smp_id
-                                        inner join sfc on pl.\"SMPID\"::text = sfc.smp_id
-                                        where cr.dcia_ft2 is not null
-                                        group by cr.smp_type"
-            
-            
-            
-            table_3_11_private_total_constructed_smps<- dbGetQuery(poolConn, sql_string_30)
-            
-            table_3_11_private_total_constructed_smps <- table_3_11_private_total_constructed_smps %>%
-              select(`SMP Type` = smp_type,`Total Constructed Private SMPs`=count)
-            table_3_11_private_monitored_smps_postcon <- table_3_11_private_monitored_smps_postcon %>%
-              select(`SMP Type` = smp_type,`Monitored SMPs`=count)
-            table_3_11 <- table_3_11_private_total_constructed_smps %>% 
-              left_join(table_3_11_private_monitored_smps_postcon, by="SMP Type")
-            table_3_11<-table_3_11[,c(1,3,2)]
-            table_3_11[is.na(table_3_11)] <-  0
-            
-            return(table_3_11)
-          })
-          
-          table_312 <- reactive({
-            
-            #3.4.2: Private SRTs
-            #Table 3.12: Post-construction private SRTs
-            #First column: This fiscal year
-            sql_string_31 <-"select count(*), type
-                          from fieldwork.viw_srt_full 
-                          where test_date >= '%s'
-                          and test_date <= '%s'
-                          and phase = 'Post-Construction'
-                          and public = false
-                          group by type"
-            
-            
-            table_3_12_private_postcon_srt <- dbGetQuery(poolConn, paste(sprintf(sql_string_31, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            
-            #3.4.2: Private SRTs
-            #Table 3.12: Post-construction private SRTs
-            #2nd column: To date
-            sql_string_32 <-"select count(*), type
-                        from fieldwork.viw_srt_full 
-                        where test_date <= '%s'
-                        and phase = 'Post-Construction'
-                        and public = false
-                        group by type"
-            
-            
-            table_3_12_private_postcon_srt_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_32,FYEND_reactive()),collapse=""))
-            
-            table_3_12 <- table_3_12_private_postcon_srt_todate %>%
-              left_join(table_3_12_private_postcon_srt, by="type") %>%
-              select(`SRT Type`=type,`This Fiscal Year`=count.y, `To Date`=count.x)
-            table_3_12[is.na(table_3_12)] <-  0
-            
-            return(table_3_12)
-            
-          })
-          
-          table_313 <- reactive({
-            
-            #Table 3.13: Private SMPs with Post-Construction SRTs
-            #First column: This fiscal year
-            
-            #Table 3.13: Private SMPs with Post-Construction SRTs
-            #First column: This fiscal year
-            
-            sql_string <- "select cr.\"smp_type\", count(distinct newtests.system_id) FROM 
-	(select system_id from fieldwork.viw_srt_full srt
-    group by system_id, public
-    having min(test_date) >= '%s'
-    and min(test_date) <= '%s'
-    and public = false) newtests
-    left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
-    group by cr.\"smp_type\""
-            
-            
-            table_3_13_private_postcon_smp_withSRT <- dbGetQuery(poolConn, paste(sprintf(sql_string, FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            #Table 3.13: Private SMPs with Post-Construction SRTs
-            #2nd column: To Date
-            sql_string <-"select cr.\"smp_type\", count(distinct newtests.system_id) FROM 
-	(select system_id from fieldwork.viw_srt_full srt
-    group by system_id, public
-    having min(test_date) <= '%s'
-    and public = false) newtests
-    left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
-    group by cr.\"smp_type\""
-            
-            table_3_13_private_postcon_smp_withSRT_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string,FYEND_reactive()),collapse=""))
-            
-            table_3_13 <- table_3_13_private_postcon_smp_withSRT_todate %>%
-              left_join(table_3_13_private_postcon_smp_withSRT, by="smp_type")
-            
-            table_3_13[is.na(table_3_13)] <-  0
-            table_3_13<-table_3_13[,c(1,3,2)]
-            colnames(table_3_13)<- c("SMP Type","This Fiscal Year","To Date")
-            
-            
-            return(table_3_13) 
-          })
-          
-          table_314 <- reactive({
-            
-            #Section 3.4.3: Private CET Testing
-            #Table 3.14 and the 3.4.3 paragraph
-            #Column 1: Private systems with CET this fiscal year
-            sql_string_35 <-"select count(distinct system_id) 
-                    from fieldwork.viw_capture_efficiency_full 
-                    where phase = 'Post-Construction'
-                    and test_date >= '%s'
-                    and test_date <= '%s'
-                    and public = FALSE"
-            
-            table_3_14_private_systems_cet <- dbGetQuery(poolConn, paste(sprintf(sql_string_35,FYSTART_reactive(), FYEND_reactive()),collapse=""))
-            
-            
-            #Section 3.4.3: Private CET Testing
-            #Table 3.14 and the 3.4.3 paragraph
-            #Column 2: Private systems with CET to date
-            sql_string_36 <-"select count(distinct system_id) 
-                  from fieldwork.viw_capture_efficiency_full 
-                  where phase = 'Post-Construction'
-                  and test_date <= '%s'
-                  and public = FALSE"
-            
-            table_3_14_private_systems_cet_todate <- dbGetQuery(poolConn, paste(sprintf(sql_string_36, FYEND_reactive()),collapse=""))
-            
-            table_3_14_private_systems_cet["To Date"] <-table_3_14_private_systems_cet_todate
-            table_3_14 <-table_3_14_private_systems_cet
-            colnames(table_3_14) <- c("This Fiscal Year","To Date")
-            rownames(table_3_14) <- "Number of Systems with CETs Administered"
-            
-            
-            
-            
-            return(table_3_14)
-          })
-          
-          #ractable table outputs
-          output$`Table 3-1` <- renderReactable(reactable(table_31(), striped = TRUE))
-          output$`Table 3-2` <- renderReactable(reactable(table_32(),pagination = FALSE, striped = TRUE))
-          output$`Table 3-3` <- renderReactable(reactable(table_33(), striped = TRUE))
-          output$`Table 3-4` <- renderReactable(reactable(table_34(), striped = TRUE))
-          output$`Table 3-5` <- renderReactable(reactable(table_35(), striped = TRUE))
-          output$`Table 3-6` <- renderReactable(reactable(table_36(), striped = TRUE))
-          output$`Table 3-7` <- renderReactable(reactable(table_37(), striped = TRUE))
-          output$`Table 3-8` <- renderReactable(reactable(table_38(), striped = TRUE))
-          output$`Table 3-9` <- renderReactable(reactable(table_39(), striped = TRUE))
-          output$`Table 3-10` <- renderReactable(reactable(table_310(), striped = TRUE))
-          output$`Table 3-11` <- renderReactable(reactable(table_311(), pagination = FALSE, striped = TRUE))
-          output$`Table 3-12` <- renderReactable(reactable(table_312(), striped = TRUE))
-          output$`Table 3-13` <- renderReactable(reactable(table_313(), striped = TRUE))
-          output$`Table 3-14` <- renderReactable(reactable(table_314(), striped = TRUE))
-          output$help_text <- renderText({
-            paste("A Shiny App to Populate the Annual Report Stats" , 
-                  "First Version Published on 08/05/2022 by Farshad Ebrahimi",
-                  sep="\n")
-          })
-          
-          output$download_table <- downloadHandler(
-            
-            filename = function() {
-              paste("FY",input$fy,"_","AnnualReport","_",Sys.Date(),".xlsx", sep = "")
-            },
-            content = function(filename){
-              
-              df_list <- list(Table_3_1=table_31(), Table_3_2=table_32(), Table_3_3=table_33(), Table_3_4=table_34(), Table_3_5=table_35(), 
-                              Table_3_6=table_36(), Table_3_7=table_37(), Table_3_8=table_38(), Table_3_9=table_39(), Table_3_10=table_310(), 
-                              Table_3_11=table_311(), Table_3_12=table_312(), Table_3_13=table_313(), Table_3_14=table_314())
-              write.xlsx(x = df_list , file = filename, rowNames = TRUE)
-            }
-          ) 
+
+        public_systems_monitored <- reactive({
+          #Public systems monitored by type todate
+          todate_public_systems_monitored_bytype <- "select sfc.asset_type, count(distinct(d.smp_id)), d.public from
+                                                            fieldwork.viw_deployment_full_cwl d
+                                                            left join external.mat_assets sfc on d.smp_id = sfc.smp_id
+                                                            where sfc.component_id is null
+                                                            and d.smp_id is not null
+                                                            and d.deployment_dtime < '%s'
+                                                            and d.public = true
+                                                            group by sfc.asset_type, d.public"
+
+          #Query monitored systems and recode MARS name to GreenIT name
+          todate_public_systems_monitored_bytype_prod <- dbGetQuery(poolConn, 
+                                                                    paste(sprintf(todate_public_systems_monitored_bytype,
+                                                                                  FYEND_reactive()),
+                                                                          collapse="")) |>
+            mutate(asset_type = fct_recode(asset_type, "Infiltration/Storage Trench" = "Trench"))
+
+
+          #Public systems constructed by type to date
+          #cipit statuses indicating constructed systems are Jillian Simmons's best recommendation
+          todate_public_systems_constructed_bytype <- "select count(*), smp_smptype from external.tbl_smpbdv g 
+                                                        where g.smp_notbuiltretired is null 
+                                                        and (g.cipit_status = 'Closed' 
+                                                        or g.cipit_status = 'Construction-Substantially Complete' 
+                                                        or g.cipit_status = 'Construction-Contract Closed') 
+                                                        group by smp_smptype"
+
+          #Query constructed systems and recode GreenIT name to MARS name
+          todate_public_systems_constructed_bytype_prod <- dbGetQuery(poolConn,
+                                                                      todate_public_systems_constructed_bytype) |>
+            mutate(smp_smptype = fct_recode(smp_smptype, "Permeable Pavement" = "Pervious Paving")) 
           
 
+          #Join and assemble table
+          todate_public_prod <- todate_public_systems_constructed_bytype_prod |> 
+            left_join(todate_public_systems_monitored_bytype_prod, 
+                      by=c("smp_smptype" = "asset_type"), 
+                      suffix = c(".constructed", ".monitored")) |>
+            arrange(smp_smptype) |>                                   #Sort alphabetically
+            add_row(smp_smptype = "Total",                            #No lazy eval in tibble::add_row()
+              count.constructed = sum(todate_public_systems_constructed_bytype_prod$count),
+              count.monitored = sum(todate_public_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
+            transmute(`SMP Type` = smp_smptype, 
+                      `Monitored SMPs` = replace_na(count.monitored, 0),
+                      `Total Constructed Public SMPs` = count.constructed)
+
+          return(todate_public_prod)
+        })
+
+        public_postcon_srt <- reactive({
+          #Post-construction public SRTs this FY
+          fy_public_postcon_srt <- "select count(*), type from fieldwork.viw_srt_full 
+                                    where test_date >= '%s'
+                                    and test_date <= '%s'
+                                    and phase = 'Post-Construction'
+                                    and public = TRUE
+                                    group by type"
+
+          fy_public_postcon_srt_prod <-dbGetQuery(poolConn, 
+                                                  paste(sprintf(fy_public_postcon_srt, 
+                                                                FYSTART_reactive(), 
+                                                                FYEND_reactive()),
+                                                        collapse=""))
+
+          #Post-construction public SRTsto date
+          todate_public_postcon_srt <-"select count(*), type from fieldwork.viw_srt_full 
+                                                                    where test_date <= '%s'
+                                                                    and phase = 'Post-Construction'
+                                                                    and public = TRUE
+                                                                    group by type"
+
+          todate_public_postcon_srt_prod <- dbGetQuery(poolConn, 
+                                                       paste(sprintf(todate_public_postcon_srt,
+                                                                     FYEND_reactive()),
+                                                             collapse=""))
+          
+          #Assembling output table
+          public_postcon_srt <- left_join(todate_public_postcon_srt_prod,
+                                          fy_public_postcon_srt_prod,
+                                          by = "type",
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(type) |>
+          add_row(type = "Total",
+              count.todate = sum(todate_public_postcon_srt_prod$count), #No lazy eval in tibble::add_row()
+              count.fy = sum(fy_public_postcon_srt_prod$count, na.rm = TRUE))
+
+          rownames(public_postcon_srt)<- public_postcon_srt$type
+          public_postcon_srt <- transmute(public_postcon_srt,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(public_postcon_srt)
+        })
+
+        public_postcon_srt_bysystem <- reactive({
+          #Public systems with post-construction srts this FY
+          fy_public_postcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+                                              from fieldwork.viw_srt_full srt
+                                              left join external.mat_assets sfc on srt.system_id = sfc.system_id
+                                              where sfc.component_id is null
+                                              and test_date >= '%s'
+                                              and test_date <= '%s'
+                                              and phase = 'Post-Construction'
+                                              and public = TRUE
+                                              group by sfc.asset_type"
+
+          fy_public_postcon_srt_systems_prod <-dbGetQuery(poolConn, 
+                                                          paste(sprintf(fy_public_postcon_srt_systems, 
+                                                                        FYSTART_reactive(), 
+                                                                        FYEND_reactive()),
+                                                                collapse=""))
+
+          #Public Systems with Post-Construction SRTs Performed TO DATE
+          todate_public_postcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+                                                            from fieldwork.viw_srt_full srt
+                                                            left join external.mat_assets sfc on srt.system_id = sfc.system_id
+                                                            where sfc.component_id is null
+                                                            and test_date <= '%s'
+                                                            and phase = 'Post-Construction'
+                                                            and public = TRUE
+                                                            group by sfc.asset_type"
+
+          todate_public_postcon_srt_systems_prod <-dbGetQuery(poolConn, 
+                                                              paste(sprintf(todate_public_postcon_srt_systems, 
+                                                                            FYEND_reactive()),
+                                                                    collapse=""))
+
+          #Assembling output table
+          public_postcon_srt_bysystem <- left_join(todate_public_postcon_srt_systems_prod,
+                                          fy_public_postcon_srt_systems_prod,
+                                          by = "asset_type",
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(asset_type) |>
+          add_row(asset_type = "Total",
+            count.todate = sum(todate_public_postcon_srt_systems_prod$count),
+            count.fy = sum(fy_public_postcon_srt_systems_prod$count, na.rm = TRUE))
+
+          rownames(public_postcon_srt_bysystem)<- public_postcon_srt_bysystem$asset_type
+          public_postcon_srt_bysystem <- transmute(public_postcon_srt_bysystem,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(public_postcon_srt_bysystem)
+        })
+
+        public_midcon_srt <- reactive({
+
+          #Mid-construction SRTs performed on Public Systems this FY
+          fy_public_midcon_srt <- "select count(*), type
+                                      from fieldwork.viw_srt_full 
+                                      where test_date >= '%s'
+                                      and test_date <= '%s'
+                                      and phase = 'Construction'
+                                      and public = TRUE
+                                      group by type"
+          fy_public_midcon_srt_prod <- dbGetQuery(poolConn, 
+                                                  paste(sprintf(fy_public_midcon_srt, 
+                                                                FYSTART_reactive(), 
+                                                                FYEND_reactive()),
+                                                        collapse=""))
+
+
+
+          #Mid-construction SRTs performed on Public Systems to date
+          todate_public_midcon_srt <- "select count(*), type
+                                    from fieldwork.viw_srt_full 
+                                    where test_date <= '%s'
+                                    and phase = 'Construction'
+                                    and public = TRUE
+                                    group by type"
+
+          todate_public_midcon_srt_prod <- dbGetQuery(poolConn, 
+                                                      paste(sprintf(todate_public_midcon_srt, 
+                                                                    FYEND_reactive()),
+                                                            collapse=""))
+
+          #Assembling output table
+          public_midcon_srt <- left_join(todate_public_midcon_srt_prod,
+                                          fy_public_midcon_srt_prod,
+                                          by = "type",
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(type) |>
+          add_row(type = "Total",
+            count.todate = sum(todate_public_midcon_srt_prod$count),
+            count.fy = sum(fy_public_midcon_srt_prod$count, na.rm = TRUE))
+
+          rownames(public_midcon_srt)<- public_midcon_srt$type
+          public_midcon_srt <- transmute(public_midcon_srt,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(public_midcon_srt)
+        })
+
+        public_midcon_srt_bysystem <- reactive({
+
+          #Public systems recieving mid-con SRTs this FY
+          fy_public_midcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+                                        from fieldwork.viw_srt_full srt
+                                        left join external.mat_assets sfc on srt.system_id = sfc.system_id
+                                        where sfc.component_id is null
+                                        and test_date >= '%s'
+                                        and test_date <= '%s'
+                                        and phase = 'Construction'
+                                        and public = TRUE
+                                        group by sfc.asset_type"
+
+          fy_public_midcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                 paste(sprintf(fy_public_midcon_srt_systems, 
+                                                               FYSTART_reactive(), 
+                                                               FYEND_reactive()),
+                                                       collapse=""))
+
+          #Public systems recieving mid-con SRTs to date
+          todate_public_midcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
+                                        from fieldwork.viw_srt_full srt
+                                        left join external.mat_assets sfc on srt.system_id = sfc.system_id
+                                        where sfc.component_id is null
+                                        and test_date <= '%s'
+                                        and phase = 'Construction'
+                                        and public = TRUE
+                                        group by sfc.asset_type"
+          todate_public_midcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                          paste(sprintf(todate_public_midcon_srt_systems,
+                                                                        FYEND_reactive()),
+                                                                collapse=""))
+
+          #Assembling output table
+          public_midcon_srt_bysystem <- left_join(todate_public_midcon_srt_systems_prod,
+                                          fy_public_midcon_srt_systems_prod,
+                                          by = "asset_type",
+                                          suffix = c(".todate", ".fy")) |>
+          arrange(asset_type) |>
+          add_row(asset_type = "Total",
+            count.todate = sum(todate_public_midcon_srt_systems_prod$count),
+            count.fy = sum(fy_public_midcon_srt_systems_prod$count, na.rm = TRUE))
+
+          rownames(public_midcon_srt_bysystem)<- public_midcon_srt_bysystem$asset_type
+          public_midcon_srt_bysystem <- transmute(public_midcon_srt_bysystem,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(public_midcon_srt_bysystem)
+        })
+
+        public_cet <- reactive({
+
+          #Public CETs this FY
+          fy_public_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+
+          fy_public_cet_prod <- dbGetQuery(poolConn, 
+                                           paste(sprintf(fy_public_cet, 
+                                                         FYSTART_reactive(), 
+                                                         FYEND_reactive()),
+                                                 collapse=""))
+
+          #Public CETs to date
+          todate_public_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+          todate_public_cet_prod <- dbGetQuery(poolConn, 
+                                               paste(sprintf(todate_public_cet,
+                                                             FYEND_reactive()),
+                                                     collapse=""))
+
+          #Assembling output table
+          public_cet <- data.frame(fy = fy_public_cet_prod$count, 
+                                   todate = todate_public_cet_prod$count)
+
+          rownames(public_cet) <- "Systems With CETs Administered"
+          public_cet <- transmute(public_cet,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_cet)
+        })
+
+        public_pp <- reactive({
+          #Public Systems with PP/PPSIRT in this fy
+          fy_public_pp <-"select count(distinct admin.fun_smp_to_system(smp_id))
+                                                from fieldwork.viw_porous_pavement_full
+                                                where test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+          fy_public_pp_prod <- dbGetQuery(poolConn, 
+                                          paste(sprintf(fy_public_pp, 
+                                                        FYSTART_reactive(), 
+                                                        FYEND_reactive()),
+                                                collapse=""))
+
+          #Public Systems with PP/PPSIRT to date
+          todate_public_pp <-"select count(distinct admin.fun_smp_to_system(smp_id))
+                                                    from fieldwork.viw_porous_pavement_full
+                                                    where test_date <= '%s'
+                                                    and public = TRUE"
+          todate_public_pp_prod <- dbGetQuery(poolConn, 
+                                              paste(sprintf(todate_public_pp, 
+                                                            FYEND_reactive()),
+                                                    collapse=""))
+
+          #Assembling output table
+          public_pp <- data.frame(fy = fy_public_pp_prod$count, 
+                                   todate = todate_public_pp_prod$count)
+
+          rownames(public_pp) <- "Systems With PP/SIRTs Administered"
+          public_pp <- transmute(public_pp,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_pp)
+        })
+
+        public_systems_leakage <- reactive({
+          #Public systems with post-construction leakage tests this fy
+          fy_public_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date >= '%s' and 
+                 test_date <= '%s') leakage_tests"
+
+
+          fy_public_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                       paste(sprintf(fy_public_systems_leakage,
+                                                                     FYSTART_reactive(), 
+                                                                     FYEND_reactive()),
+                                                             collapse=""))
+
+          #public systems with post-con leakage tests to date
+          todate_public_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date <= '%s') leakage_tests"
+
+
+          todate_public_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                           paste(sprintf(todate_public_systems_leakage,
+                                                                         FYEND_reactive()),
+                                                                 collapse=""))
+
+
+          #Assembling output table
+          public_systems_leakage <- data.frame(fy = fy_public_systems_leakage_prod$count, 
+                                   todate = todate_public_systems_leakage_prod$count)
+
+          rownames(public_systems_leakage) <- "Systems With Leakage Tests Administered"
+          public_systems_leakage <- transmute(public_systems_leakage,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_systems_leakage)
+        })
+
+        public_systems_ict <- reactive({
+          #Public Systems with ICTs this fy
+          fy_public_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date >= '%s' and 
+                test_date <= '%s') ict"
+
+          fy_public_systems_ict_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(fy_public_systems_ict,
+                                                                 FYSTART_reactive(),
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Public Systems with ICTs to date
+          todate_public_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date <= '%s') ict"
+
+          todate_public_systems_ict_prod <- dbGetQuery(poolConn,
+                                                       paste(sprintf(todate_public_systems_ict,
+                                                                     FYEND_reactive()),
+                                                             collapse = ""))
+
+          #Assembling output table
+          public_systems_ict <- data.frame(fy = fy_public_systems_ict_prod$count, 
+                                   todate = todate_public_systems_ict_prod$count)
+
+          rownames(public_systems_ict) <- "Systems With ICTs Administered"
+          public_systems_ict <- transmute(public_systems_ict,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_systems_ict)
+        })
+
+        public_gw <- reactive({
+          #Public systems with preconstruction GW monitoring this FY
+          fy_public_precon_gw <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
+                                                          and deployment_dtime <= '%s'
+                                                          and (collection_dtime >= '%s' OR collection_dtime is null)
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+
+          fy_public_precon_gw_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_precon_gw, 
+                                                              FYEND_reactive(), 
+                                                              FYSTART_reactive()),
+                                                      collapse=""))
+
+          #Public systems with postconstruction GW monitoring this FY
+          fy_public_postcon_gw <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
+                                                          and deployment_dtime <= '%s'
+                                                          and (collection_dtime >= '%s' OR collection_dtime is null)
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          fy_public_postcon_gw_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_postcon_gw, 
+                                                               FYEND_reactive(), 
+                                                               FYSTART_reactive()),
+                                                       collapse=""))
+
+          #Public systems with preconstruction GW monitoring to date
+          todate_public_precon_gw <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          todate_public_precon_gw_prod <- dbGetQuery(poolConn, todate_public_precon_gw)
+
+          #Public systems with postconstruction GW monitoring to date
+          todate_public_postcon_gw <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
+                                                                                    and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          todate_public_postcon_gw_prod <- dbGetQuery(poolConn, todate_public_postcon_gw)
+
+
+          #Assembling output table
+          public_gw <- data.frame("fy" = rep(NA, 2), "todate" = rep(NA, 2))
+          public_gw$fy <- c(fy_public_precon_gw_prod$count, #Public precon GW systems this FY
+                                     fy_public_postcon_gw_prod$count) #Public postcon GW systems this FY
+          
+          public_gw$todate <- c(todate_public_precon_gw_prod$count, #Public postcon GW systems to date
+                                         todate_public_postcon_gw_prod$count) #Public postcon GW systems to date
+          
+          colnames(public_gw)<- c("This Fiscal Year","To Date")
+          rownames(public_gw)<-c("Systems with Pre-Construction GW Monitoring", "Systems with Post-Construction GW Monitoring")
+
+          return(public_gw)
+        })
+
+        private_postcon_cwl <- reactive({
+
+          #Private sensors deployed this FY
+          fy_private_sensors_deployed <-  "select count(*) from fieldwork.viw_deployment_full_cwl
+                                            where (collection_dtime > '%s' OR collection_dtime is null)
+                                            and deployment_dtime between '%s' and '%s'
+                                            and public = FALSE"
+
+          fy_private_sensors_deployed_prod <- dbGetQuery(poolConn, 
+                                                         paste(sprintf(fy_private_sensors_deployed, 
+                                                                       FYSTART_reactive(), 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive()),
+                                                               collapse="")) 
+
+          #Private systems monitored this FY
+          fy_private_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
+                                            where deployment_dtime between '%s' and '%s'
+                                            and (collection_dtime >= '%s'
+                                                or collection_dtime is null) 
+                                            and d.public = false"
+          fy_private_systems_monitored_prod <- dbGetQuery(poolConn, paste(sprintf(fy_private_systems_monitored, 
+                                                                    FYSTART_reactive(), 
+                                                                    FYEND_reactive(), 
+                                                                    FYSTART_reactive()),
+                                                            collapse="")) 
+
+          #Newly monitored systems this fiscal year (private)
+          fy_private_systems_newly_monitored <-"select count(distinct admin.fun_smp_to_system(newdeployments.smp_id)) FROM 
+                                                      (select d.smp_id FROM fieldwork.viw_deployment_full_cwl d 
+                                                         group BY d.smp_id, d.public
+                                                         having min(d.deployment_dtime) > '%s'
+                                                         and min(d.deployment_dtime) <= '%s'
+                                                         and d.public = false) newdeployments"
+          fy_private_systems_newly_monitored_prod <- dbGetQuery(poolConn, 
+                                                                paste(sprintf(fy_private_systems_newly_monitored,
+                                                                              FYSTART_reactive(), 
+                                                                              FYEND_reactive()),
+                                                                      collapse=""))
+
+          #Private sensor deployments to date
+          todate_private_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+                                            where deployment_dtime < '%s'
+                                            and public = FALSE"
+
+          todate_private_sensors_deployed_prod <- dbGetQuery(poolConn, 
+                                                        paste(sprintf(todate_private_sensors_deployed,
+                                                                      FYEND_reactive()),
+                                                              collapse="")) 
+
+          #Private systems monitored to date
+          todate_private_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
+                                            where deployment_dtime <= '%s'
+                                            and d.public = false"
+          todate_private_systems_monitored_prod <- dbGetQuery(poolConn, 
+                                                    paste(sprintf(todate_private_systems_monitored, 
+                                                                  FYEND_reactive()),
+                                                          collapse="")) 
+
+          #Assembling output table
+          private_postcon_cwl <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+          private_postcon_cwl$fy <- c(fy_private_sensors_deployed_prod$count, #private sensors deployed
+                                     fy_private_systems_monitored_prod$count, #private systems monitored
+                                     fy_private_systems_newly_monitored_prod$count) #private systems newly monitored
+          
+          private_postcon_cwl$todate <- c(todate_private_sensors_deployed_prod$count, #private sensors deployed
+                                         todate_private_systems_monitored_prod$count, #private systems monitored
+                                         NA) #private systems newly monitored is only defined for the FY
+          
+          colnames(private_postcon_cwl)<- c("This Fiscal Year","To Date")
+          rownames(private_postcon_cwl)<-c("Sensors Deployed","Systems Monitored","Systems Newly Monitored")
+          
+          return(private_postcon_cwl)
+        })
+
+        todate_private_prod <- reactive({
+          #Post-Construction Monitored private SMPs by type to date
+          todate_private_systems_monitored_bytype <- "select cr.\"smp_type\" as smp_type, count(distinct(d.smp_id)), d.public from
+                            fieldwork.viw_deployment_full_cwl d
+                            left join external.tbl_planreview_crosstab cr on d.smp_id = cr.\"smp_id\"::text
+                            where d.smp_id is not null
+                            and d.deployment_dtime < '%s'
+                            and d.public = false
+                            group by cr.\"smp_type\", d.public;"
+
+          todate_private_systems_monitored_bytype_prod <- dbGetQuery(poolConn, 
+                                                           paste(sprintf(todate_private_systems_monitored_bytype,
+                                                                         FYEND_reactive()),
+                                                                 collapse=""))
+
+          #Total constructed private SMPs to date
+          todate_constructed_private_systems_bytype <- "with sfc as (
+                                                    select distinct smp_id from external.mat_assets 
+                                                    where smp_id is not null
+                                                    and component_id is null
+                                                  ), pl as (
+                                                    select distinct \"SMPID\" from external.tbl_planreview_private
+                                                  ), cr as (
+                                                    select distinct smp_id, dcia_ft2, smp_type from external.tbl_planreview_crosstab
+                                                  )
+                                                  
+                                                  select count(*), cr.smp_type from pl 
+                                                  left join cr on pl.\"SMPID\"::text = cr.smp_id
+                                                  inner join sfc on pl.\"SMPID\"::text = sfc.smp_id
+                                                  where cr.dcia_ft2 is not null
+                                                  group by cr.smp_type"
+
+          todate_constructed_private_systems_bytype_prod<- dbGetQuery(poolConn, todate_constructed_private_systems_bytype)
+
+          #Assembling output table
+          todate_private_prod <- todate_constructed_private_systems_bytype_prod |>
+            left_join(todate_private_systems_monitored_bytype_prod, 
+                      by = "smp_type",
+                      suffix = c(".constructed", ".monitored")) |>
+            arrange(smp_type) |>                                   #Sort alphabetically
+            add_row(smp_type = "Total",                            #No lazy eval in tibble::add_row()
+              count.constructed = sum(todate_constructed_private_systems_bytype_prod$count),
+              count.monitored = sum(todate_private_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
+            transmute(`SMP Type` = smp_type, 
+                      `Monitored SMPs` = replace_na(count.monitored, 0),
+                      `Total Constructed Private SMPs` = count.constructed)
+
+            return(todate_private_prod)
+        })
+
+        private_postcon_srt <- reactive({
+          #Post-construction private SRTs this FY
+          fy_private_postcon_srt <-"select count(*), type
+                                    from fieldwork.viw_srt_full 
+                                    where test_date >= '%s'
+                                    and test_date <= '%s'
+                                    and phase = 'Post-Construction'
+                                    and public = false
+                                    group by type"
+
+
+          fy_private_postcon_srt_prod <- dbGetQuery(poolConn, 
+                                                    paste(sprintf(fy_private_postcon_srt, 
+                                                                  FYSTART_reactive(), 
+                                                                  FYEND_reactive()),
+                                                          collapse=""))
+
+          #Post-construction private SRTs to date
+          todate_private_postcon_srt <-"select count(*), type
+                                  from fieldwork.viw_srt_full 
+                                  where test_date <= '%s'
+                                  and phase = 'Post-Construction'
+                                  and public = false
+                                  group by type"
+
+
+          todate_private_postcon_srt_prod <- dbGetQuery(poolConn, 
+                                                        paste(sprintf(todate_private_postcon_srt,
+                                                                      FYEND_reactive()),
+                                                              collapse=""))
+
+          #Assembling output table
+          private_postcon_srt <- left_join(todate_private_postcon_srt_prod,
+                                          fy_private_postcon_srt_prod,
+                                          by = "type",
+                                          suffix = c(".todate", ".fy")) |>
+            arrange(type) |>
+            add_row(type = "Total",
+            count.todate = sum(todate_private_postcon_srt_prod$count),
+            count.fy = sum(fy_private_postcon_srt_prod$count, na.rm = TRUE))
+
+          rownames(private_postcon_srt)<- private_postcon_srt$type
+          private_postcon_srt <- transmute(private_postcon_srt,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(private_postcon_srt)
+        })
+
+        private_postcon_srt_bysystem <- reactive({
+          #Private systems with post-con SRTs this FY
+          fy_private_postcon_srt_systems <- "select cr.\"smp_type\" as smp_type, count(distinct newtests.system_id) FROM 
+            (select system_id from fieldwork.viw_srt_full srt
+              group by system_id, public
+              having min(test_date) >= '%s'
+              and min(test_date) <= '%s'
+              and public = false) newtests
+              left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
+              group by cr.\"smp_type\""
+
+
+          fy_private_postcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                         paste(sprintf(fy_private_postcon_srt_systems, 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive()),
+                                                               collapse=""))
+
+          #Private systems with post-con SRTs to date
+          todate_private_postcon_srt_systems <-"select cr.\"smp_type\" as smp_type, count(distinct newtests.system_id) FROM 
+            (select system_id from fieldwork.viw_srt_full srt
+              group by system_id, public
+              having min(test_date) <= '%s'
+              and public = false) newtests
+              left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
+              group by cr.\"smp_type\""
+
+          todate_private_postcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                             paste(sprintf(todate_private_postcon_srt_systems,
+                                                                           FYEND_reactive()),
+                                                                   collapse=""))
+
+          #Assembling output table
+          private_postcon_srt_bysystem <- left_join(todate_private_postcon_srt_systems_prod,
+                                          fy_private_postcon_srt_systems_prod,
+                                          by = "smp_type",
+                                          suffix = c(".todate", ".fy")) |>
+            arrange(smp_type) |>
+            add_row(smp_type = "Total",
+              count.todate = sum(todate_private_postcon_srt_systems_prod$count),
+              count.fy = sum(fy_private_postcon_srt_systems_prod$count, na.rm = TRUE))
+
+          rownames(private_postcon_srt_bysystem)<- private_postcon_srt_bysystem$smp_type
+          private_postcon_srt_bysystem <- transmute(private_postcon_srt_bysystem,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(private_postcon_srt_bysystem)
+        })
+
+        private_cet <- reactive({
+
+          #Public CETs this FY
+          fy_private_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = FALSE"
+
+          fy_private_cet_prod <- dbGetQuery(poolConn, 
+                                           paste(sprintf(fy_private_cet, 
+                                                         FYSTART_reactive(), 
+                                                         FYEND_reactive()),
+                                                 collapse=""))
+
+          #Public CETs to date
+          todate_private_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date <= '%s'
+                                                and public = FALSE"
+          todate_private_cet_prod <- dbGetQuery(poolConn, 
+                                               paste(sprintf(todate_private_cet,
+                                                             FYEND_reactive()),
+                                                     collapse=""))
+
+          #Assembling output table
+          private_cet <- data.frame(fy = fy_private_cet_prod$count, 
+                                   todate = todate_private_cet_prod$count)
+
+          rownames(private_cet) <- "Systems With CETs Administered"
+          private_cet <- transmute(private_cet,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_cet)
+        })
+
+        private_leakage <- reactive({
+          #private systems with post-con leakage tests this fy
+          fy_private_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date >= '%s' and 
+                 test_date <= '%s') leakage_tests"
+
+
+          fy_private_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                        paste(sprintf(fy_private_systems_leakage,
+                                                                      FYSTART_reactive(),
+                                                                      FYEND_reactive()),
+                                                              collapse=""))
+
+          #private systems with post-con leakage tests to date
+          todate_private_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date <= '%s') leakage_tests"
+
+
+          todate_private_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                            paste(sprintf(todate_private_systems_leakage,
+                                                                          FYEND_reactive()),
+                                                                  collapse=""))
+
+          #Assembling output table
+          private_leakage <- data.frame(fy = fy_private_systems_leakage_prod$count, 
+                                   todate = todate_private_systems_leakage_prod$count)
+
+          rownames(private_leakage) <- "Systems With Leakage Tests Administered"
+          private_leakage <- transmute(private_leakage,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_leakage)
+        })
+
+        private_systems_ict <- reactive({
+          #Private Systems with ICTs this fy
+          fy_private_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id not similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date >= '%s' and 
+                test_date <= '%s') ict"
+
+          fy_private_systems_ict_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(fy_private_systems_ict,
+                                                                 FYSTART_reactive(),
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Private Systems with ICTs to date
+          todate_private_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id not similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date <= '%s') ict"
+
+          todate_private_systems_ict_prod <- dbGetQuery(poolConn,
+                                                       paste(sprintf(todate_private_systems_ict,
+                                                                     FYEND_reactive()),
+                                                             collapse = ""))
+
+          #Assembling output table
+          private_systems_ict <- data.frame(fy = fy_private_systems_ict_prod$count, 
+                                   todate = todate_private_systems_ict_prod$count)
+
+          rownames(private_systems_ict) <- "Systems With ICTs Administered"
+          private_systems_ict <- transmute(private_systems_ict,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_systems_ict)
+        })
+
+        private_systems_wwi <- reactive({
+          #Private systems with wet weather inspections this FY
+          fy_private_systems_wwi <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Wet Weather Inspection' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date >= '%s' and 
+                 test_date <= '%s') wwi"
+
+          fy_private_systems_wwi_prod <- dbGetQuery(poolConn,
+                                                    paste(sprintf(fy_private_systems_wwi,
+                                                                  FYSTART_reactive(),
+                                                                  FYEND_reactive()),
+                                                          collapse = ""))
+
+          #Private systems with wet weather inspections to date
+          todate_private_systems_wwi <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Wet Weather Inspection' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date <= '%s') wwi"
+
+          todate_private_systems_wwi_prod <- dbGetQuery(poolConn,
+                                                        paste(sprintf(todate_private_systems_wwi,
+                                                                      FYEND_reactive()),
+                                                              collapse = ""))
+
+          #Assembling output table
+          private_systems_wwi <- data.frame(fy = fy_private_systems_wwi_prod$count, 
+                                   todate = todate_private_systems_wwi_prod$count)
+
+          rownames(private_systems_wwi) <- "Systems With Wet-Weather Inspections Administered"
+          private_systems_wwi <- transmute(private_systems_wwi,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_systems_wwi)
+        })
+
+        collection_dye <- reactive({
+          #Collection system dye tests this FY
+          fy_collection_dye <- "select count(*) from fieldwork.viw_special_investigation_full 
+                 where special_investigation_type = 'Private Plumbing' and 
+                 test_date >= '%s' and 
+                 test_date <= '%s'"
+
+          fy_collection_dye_prod <- dbGetQuery(poolConn,
+                                               paste(sprintf(fy_collection_dye,
+                                                             FYSTART_reactive(),
+                                                             FYEND_reactive()),
+                                                     collapse = ""))
+
+          #Collection system dye tests to date
+          todate_collection_dye <- "select count(*) from fieldwork.viw_special_investigation_full where
+                 special_investigation_type = 'Private Plumbing' and 
+                 test_date <= '%s'"
+
+          todate_collection_dye_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(todate_collection_dye,
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Assembling output table
+          collection_dye <- data.frame(fy = fy_collection_dye_prod$count, 
+                                   todate = todate_collection_dye_prod$count)
+
+          rownames(collection_dye) <- "Collection System Dye Tests Administered"
+          collection_dye <- transmute(collection_dye,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(collection_dye)
         })
         
-       
-      }
-    )
-  }
-    
+        #reactable table outputs
+        output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(public_postcon_cwl(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Public SMPs Listed by Type` <- renderReactable(reactable(public_systems_monitored(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction SRTs performed on Public Systems` <- renderReactable(reactable(public_postcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Post-Construction SRTs Performed` <- renderReactable(reactable(public_postcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(public_midcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(public_midcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with CETs Administered` <- renderReactable(reactable(public_cet(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(public_pp(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(public_systems_leakage(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with ICTs Administered` <- renderReactable(reactable(public_systems_ict(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(public_gw(), striped = TRUE, pagination = FALSE))
+        output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(private_postcon_cwl(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(todate_private_prod(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(private_postcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(private_postcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with CETs Administered` <- renderReactable(reactable(private_cet(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(private_leakage(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with ICTs Administered` <- renderReactable(reactable(private_systems_ict(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with WWIs Administered` <- renderReactable(reactable(private_systems_wwi(), striped = TRUE, pagination = FALSE))
+        output$`Collection System Dye Tests Administered` <- renderReactable(reactable(collection_dye(), striped = TRUE, pagination = FALSE))
+
+
+        output$help_text <- renderText({
+          paste("A Shiny App to Populate the Annual Report Stats" , 
+                "First Version Published on 08/05/2022 by Farshad Ebrahimi",
+                "Updated by Monica Gucciardi in September 2026",
+                sep="\n")
+        })
+        
+        output$download_table <- downloadHandler(
+          
+          filename = function() {
+            paste("FY",input$fy,"_","AnnualReport","_",Sys.Date(),".xlsx", sep = "")
+          },
+          content = function(filename){
+            
+            df_list <- list(public_postcon_cwl = public_postcon_cwl(),
+                            public_systems_monitored = public_systems_monitored(),
+                            public_postcon_srt = public_postcon_srt(),
+                            public_postcon_srt_bysystem = public_postcon_srt_bysystem(),
+                            public_midcon_srt = public_midcon_srt(),
+                            public_midcon_srt_bysystem = public_midcon_srt_bysystem(),
+                            public_cet = public_cet(),
+                            public_pp = public_pp(),
+                            public_systems_leakage = public_systems_leakage(),
+                            public_systems_ict = public_systems_ict(),
+                            public_gw = public_gw(),
+                            private_postcon_cwl = private_postcon_cwl(),
+                            todate_private_prod = todate_private_prod(),
+                            private_postcon_srt = private_postcon_srt(),
+                            private_postcon_srt_bysystem = private_postcon_srt_bysystem(),
+                            private_cet = private_cet(),
+                            private_leakage = private_leakage(),
+                            private_systems_ict = private_systems_ict(),
+                            private_systems_wwi = private_systems_wwi(),
+                            collection_dye = collection_dye())
+            write.xlsx(x = df_list , file = filename, rowNames = TRUE)
+          }
+        ) 
         
         
-  
-  
-  
-  
+      })
+      
+      
+    }
+  )
+}
+
+
+
+
+
+

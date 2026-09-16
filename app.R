@@ -5,25 +5,32 @@
 #0.0: load libraries --------------
 #shiny
 library(shiny)
+
 #pool for database connections
 library(pool)
-#odbc for database connections
-library(odbc)
+
 #tidyverse for data manipulations
 library(tidyverse)
+
 #shinythemes for colors
 library(shinythemes)
+
 #lubridate to work with dates
 library(lubridate)
+
 #shinyjs() to use easy java script functions
 library(shinyjs)
+
 #DT for datatables
 library(DT)
+
 #reactable for reactable tables
 library(reactable)
 
+#Forcats for factor manipulation
+library(forcats)
+
 #annual report stuff
-library(reactablefmtr)
 library(shinydashboard)
 library(openxlsx)
 
@@ -84,7 +91,7 @@ ui <- function(req){
     #must call useShinyjs() for shinyjs() functionality to work in app
     useShinyjs(),
     navbarPage("Monitoring Stats",  id = "inTabset", theme = shinytheme("cerulean"),
-      #Stats
+      # #Stats
       m_statsUI("stats", current_fy = current_fy, years = years),
       #Quarterly Report
       q_reportUI("q_report", current_fy = current_fy, years = years),
@@ -107,13 +114,13 @@ server <- function(input, output, session) {
   #monitoring stats
   current_fy <- lubridate::today() %m+% months(6) %>% year()
   
-  # 2.2: Server Module functions ---------------------------
+  #2.2: Server Module functions ---------------------------
   #Stats
   stats <- m_statsServer("stats", parent_session = session, current_fy = current_fy, poolConn = poolConn)
-  
+
   #Quarterly Report
   q_report <- q_reportServer("q_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
-  
+  # 
   #Annual report
   a_report <- a_reportServer("a_report", parent_session = session, current_fy = current_fy, poolConn = poolConn)
   
