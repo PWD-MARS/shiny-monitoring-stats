@@ -254,7 +254,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                       by=c("smp_smptype" = "asset_type"), 
                       suffix = c(".constructed", ".monitored")) |>
             arrange(smp_smptype) |>                                   #Sort alphabetically
-            add_row(smp_smptype = "Total",
+            add_row(smp_smptype = "Total",                            #No lazy eval in tibble::add_row()
               count.constructed = sum(todate_public_systems_constructed_bytype_prod$count),
               count.monitored = sum(todate_public_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
             transmute(`SMP Type` = smp_smptype, 
@@ -782,6 +782,10 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
             left_join(todate_private_systems_monitored_bytype_prod, 
                       by = "smp_type",
                       suffix = c(".constructed", ".monitored")) |>
+            arrange(smp_type) |>                                   #Sort alphabetically
+            add_row(smp_type = "Total",                            #No lazy eval in tibble::add_row()
+              count.constructed = sum(todate_constructed_private_systems_bytype_prod$count),
+              count.monitored = sum(todate_private_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
             transmute(`SMP Type` = smp_type, 
                       `Monitored SMPs` = replace_na(count.monitored, 0),
                       `Total Constructed Private SMPs` = count.constructed)
