@@ -828,7 +828,11 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           private_postcon_srt <- left_join(todate_private_postcon_srt_prod,
                                           fy_private_postcon_srt_prod,
                                           by = "type",
-                                          suffix = c(".todate", ".fy"))
+                                          suffix = c(".todate", ".fy")) |>
+            arrange(type) |>
+            add_row(type = "Total",
+            count.todate = sum(todate_private_postcon_srt_prod$count),
+            count.fy = sum(fy_private_postcon_srt_prod$count, na.rm = TRUE))
 
           rownames(private_postcon_srt)<- private_postcon_srt$type
           private_postcon_srt <- transmute(private_postcon_srt,
