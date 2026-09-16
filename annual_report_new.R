@@ -81,11 +81,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-4: Private SMPs with Post-Construction SRTs Performed"),
                 reactableOutput(ns("Private SMPs with Post-Construction SRTs Performed")),
-              br() #,
+              br(),
                 
-              # strong("Table 6-5: Private Systems with CETs Administered"),
-              #   reactableOutput(ns("Private Systems with CETs Administered")),
-              # br(),
+              strong("Table 6-5: Private Systems with CETs Administered"),
+                reactableOutput(ns("Private Systems with CETs Administered")),
+              br() #,
                 
               # strong("Table 6-6: Private Systems with ICTs Administered"),
               #   reactableOutput(ns("Private Systems with ICTs Administered")),
@@ -859,6 +859,46 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 
         })
 
+        table_6_5 <- reactive({
+
+          #Public CETs this FY
+          fy_private_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = FALSE"
+
+          fy_private_cet_prod <- dbGetQuery(poolConn, 
+                                           paste(sprintf(fy_private_cet, 
+                                                         FYSTART_reactive(), 
+                                                         FYEND_reactive()),
+                                                 collapse=""))
+
+          #Public CETs to date
+          todate_private_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date <= '%s'
+                                                and public = FALSE"
+          todate_private_cet_prod <- dbGetQuery(poolConn, 
+                                               paste(sprintf(todate_private_cet,
+                                                             FYEND_reactive()),
+                                                     collapse=""))
+
+          #Assembling output table
+          private_cet <- data.frame(fy = fy_private_cet_prod$count, 
+                                   todate = todate_private_cet_prod$count)
+
+          rownames(private_cet) <- "Systems With CETs Administered"
+          private_cet <- transmute(private_cet,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_cet)
+        })
+
+
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -876,7 +916,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
         output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
         output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
-        # output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
 
