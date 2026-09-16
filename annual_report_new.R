@@ -136,7 +136,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         
         #Reactive table poplutions here-all outputs must be reactive dataframes
         
-        public_postcon_cwl_table <- reactive({
+        public_postcon_cwl <- reactive({
           
           #Public sensors deployed this FY
           fy_public_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
@@ -214,7 +214,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_postcon_cwl)
         })
 
-        public_systems_monitored_table <- reactive({
+        public_systems_monitored <- reactive({
           #Public systems monitored by type todate
           todate_public_systems_monitored_bytype <- "select sfc.asset_type, count(distinct(d.smp_id)), d.public from
                                                             fieldwork.viw_deployment_full_cwl d
@@ -264,7 +264,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(todate_public_prod)
         })
 
-        public_postcon_srt_table <- reactive({
+        public_postcon_srt <- reactive({
           #Post-construction public SRTs this FY
           fy_public_postcon_srt <- "select count(*), type from fieldwork.viw_srt_full 
                                     where test_date >= '%s'
@@ -309,7 +309,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_postcon_srt)
         })
 
-        table_5_4 <- reactive({
+        public_postcon_srt_bysystem <- reactive({
           #Public systems with post-construction srts this FY
           fy_public_postcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
                                               from fieldwork.viw_srt_full srt
@@ -360,7 +360,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_postcon_srt_bysystem)
         })
 
-        table_5_5 <- reactive({
+        public_midcon_srt <- reactive({
 
           #Mid-construction SRTs performed on Public Systems this FY
           fy_public_midcon_srt <- "select count(*), type
@@ -409,7 +409,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_midcon_srt)
         })
 
-        table_5_6 <- reactive({
+        public_midcon_srt_bysystem <- reactive({
 
           #Public systems recieving mid-con SRTs this FY
           fy_public_midcon_srt_systems <-"select sfc.asset_type, count(distinct(srt.system_id))
@@ -460,7 +460,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_midcon_srt_bysystem)
         })
 
-        table_5_7 <- reactive({
+        public_cet <- reactive({
 
           #Public CETs this FY
           fy_public_cet <-"select count(distinct system_id) 
@@ -499,7 +499,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_cet)
         })
 
-        table_5_8 <- reactive({
+        public_pp <- reactive({
           #Public Systems with PP/PPSIRT in this fy
           fy_public_pp <-"select count(distinct admin.fun_smp_to_system(smp_id))
                                                 from fieldwork.viw_porous_pavement_full
@@ -534,7 +534,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_pp)
         })
 
-        table_5_9 <- reactive({
+        public_systems_leakage <- reactive({
           #Public systems with post-construction leakage tests this fy
           fy_public_systems_leakage <- "select count(*) from 
               (select distinct system_id from fieldwork.viw_special_investigation_full 
@@ -580,7 +580,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_systems_leakage)
         })
 
-        table_5_10 <- reactive({
+        public_systems_ict <- reactive({
           #Public Systems with ICTs this fy
           fy_public_systems_ict <- "select count(*) from 
               (select distinct system_id from fieldwork.viw_inlet_conveyance_full
@@ -621,7 +621,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_systems_ict)
         })
 
-        table_5_11 <- reactive({
+        public_gw <- reactive({
           #Public systems with preconstruction GW monitoring this FY
           fy_public_precon_gw <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
                                                           and deployment_dtime <= '%s'
@@ -668,7 +668,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_gw)
         })
 
-        table_6_1 <- reactive({
+        private_postcon_cwl <- reactive({
 
           #Private sensors deployed this FY
           fy_private_sensors_deployed <-  "select count(*) from fieldwork.viw_deployment_full_cwl
@@ -743,7 +743,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_postcon_cwl)
         })
 
-        table_6_2 <- reactive({
+        todate_private_prod <- reactive({
           #Post-Construction Monitored private SMPs by type to date
           todate_private_systems_monitored_bytype <- "select cr.\"smp_type\" as smp_type, count(distinct(d.smp_id)), d.public from
                             fieldwork.viw_deployment_full_cwl d
@@ -793,7 +793,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
             return(todate_private_prod)
         })
 
-        table_6_3 <- reactive({
+        private_postcon_srt <- reactive({
           #Post-construction private SRTs this FY
           fy_private_postcon_srt <-"select count(*), type
                                     from fieldwork.viw_srt_full 
@@ -842,7 +842,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_postcon_srt)
         })
 
-        table_6_4 <- reactive({
+        private_postcon_srt_bysystem <- reactive({
           #Private systems with post-con SRTs this FY
           fy_private_postcon_srt_systems <- "select cr.\"smp_type\" as smp_type, count(distinct newtests.system_id) FROM 
             (select system_id from fieldwork.viw_srt_full srt
@@ -892,7 +892,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_postcon_srt_bysystem)
         })
 
-        table_6_5 <- reactive({
+        private_cet <- reactive({
 
           #Public CETs this FY
           fy_private_cet <-"select count(distinct system_id) 
@@ -931,7 +931,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_cet)
         })
 
-        table_6_6 <- reactive({
+        private_leakage <- reactive({
           #private systems with post-con leakage tests this fy
           fy_private_systems_leakage <- "select count(*) from 
               (select distinct system_id from fieldwork.viw_special_investigation_full 
@@ -976,7 +976,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_leakage)
         })
 
-        table_6_7 <- reactive({
+        private_systems_ict <- reactive({
           #Private Systems with ICTs this fy
           fy_private_systems_ict <- "select count(*) from 
               (select distinct system_id from fieldwork.viw_inlet_conveyance_full
@@ -1017,7 +1017,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_systems_ict)
         })
 
-        table_6_8 <- reactive({
+        private_systems_wwi <- reactive({
           #Private systems with wet weather inspections this FY
           fy_private_systems_wwi <- "select count(*) from 
               (select distinct system_id from fieldwork.viw_special_investigation_full 
@@ -1060,7 +1060,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_systems_wwi)
         })
 
-        table_7_1 <- reactive({
+        collection_dye <- reactive({
           #Collection system dye tests this FY
           fy_collection_dye <- "select count(*) from fieldwork.viw_special_investigation_full 
                  where special_investigation_type = 'Private Plumbing' and 
@@ -1096,26 +1096,26 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         })
         
         #reactable table outputs
-        output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(public_postcon_cwl_table(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction CWL Monitoring of Public SMPs Listed by Type` <- renderReactable(reactable(public_systems_monitored_table(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction SRTs performed on Public Systems` <- renderReactable(reactable(public_postcon_srt_table(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Post-Construction SRTs Performed` <- renderReactable(reactable(table_5_4(), striped = TRUE, pagination = FALSE))
-        output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(table_5_5(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(table_5_6(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with ICTs Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
-        output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
-        output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
-        output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
-        output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
-        output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
-        output$`Private Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
-        output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
-        output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_8(), striped = TRUE, pagination = FALSE))
-        output$`Collection System Dye Tests Administered` <- renderReactable(reactable(table_7_1(), striped = TRUE, pagination = FALSE))
+        output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(public_postcon_cwl(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Public SMPs Listed by Type` <- renderReactable(reactable(public_systems_monitored(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction SRTs performed on Public Systems` <- renderReactable(reactable(public_postcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Post-Construction SRTs Performed` <- renderReactable(reactable(public_postcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(public_midcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(public_midcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with CETs Administered` <- renderReactable(reactable(public_cet(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(public_pp(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(public_systems_leakage(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with ICTs Administered` <- renderReactable(reactable(public_systems_ict(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(public_gw(), striped = TRUE, pagination = FALSE))
+        output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(private_postcon_cwl(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(todate_private_prod(), striped = TRUE, pagination = FALSE))
+        output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(private_postcon_srt(), striped = TRUE, pagination = FALSE))
+        output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(private_postcon_srt_bysystem(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with CETs Administered` <- renderReactable(reactable(private_cet(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(private_leakage(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with ICTs Administered` <- renderReactable(reactable(private_systems_ict(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with WWIs Administered` <- renderReactable(reactable(private_systems_wwi(), striped = TRUE, pagination = FALSE))
+        output$`Collection System Dye Tests Administered` <- renderReactable(reactable(collection_dye(), striped = TRUE, pagination = FALSE))
 
 
         output$help_text <- renderText({
@@ -1132,26 +1132,26 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           },
           content = function(filename){
             
-            df_list <- list(public_postcon_cwl_table = public_postcon_cwl_table(),
-                            public_systems_monitored_table = public_systems_monitored_table(),
-                            public_postcon_srt_table = public_postcon_srt_table(),
-                            table_5_4 = table_5_4(),
-                            table_5_5 = table_5_5(),
-                            table_5_6 = table_5_6(),
-                            table_5_7 = table_5_7(),
-                            table_5_8 = table_5_8(),
-                            table_5_9 = table_5_9(),
-                            table_5_10 = table_5_10(),
-                            table_5_11 = table_5_11(),
-                            table_6_1 = table_6_1(),
-                            table_6_2 = table_6_2(),
-                            table_6_3 = table_6_3(),
-                            table_6_4 = table_6_4(),
-                            table_6_5 = table_6_5(),
-                            table_6_6 = table_6_6(),
-                            table_6_7 = table_6_7(),
-                            table_6_8 = table_6_8(),
-                            table_7_1 = table_7_1())
+            df_list <- list(public_postcon_cwl = public_postcon_cwl(),
+                            public_systems_monitored = public_systems_monitored(),
+                            public_postcon_srt = public_postcon_srt(),
+                            public_postcon_srt_bysystem = public_postcon_srt_bysystem(),
+                            public_midcon_srt = public_midcon_srt(),
+                            public_midcon_srt_bysystem = public_midcon_srt_bysystem(),
+                            public_cet = public_cet(),
+                            public_pp = public_pp(),
+                            public_systems_leakage = public_systems_leakage(),
+                            public_systems_ict = public_systems_ict(),
+                            public_gw = public_gw(),
+                            private_postcon_cwl = private_postcon_cwl(),
+                            todate_private_prod = todate_private_prod(),
+                            private_postcon_srt = private_postcon_srt(),
+                            private_postcon_srt_bysystem = private_postcon_srt_bysystem(),
+                            private_cet = private_cet(),
+                            private_leakage = private_leakage(),
+                            private_systems_ict = private_systems_ict(),
+                            private_systems_wwi = private_systems_wwi(),
+                            collection_dye = collection_dye())
             write.xlsx(x = df_list , file = filename, rowNames = TRUE)
           }
         ) 
