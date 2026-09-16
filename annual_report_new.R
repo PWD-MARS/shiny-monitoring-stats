@@ -77,11 +77,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-3: Post-Construction SRTs performed on Private Systems"),
                 reactableOutput(ns("Post-Construction SRTs performed on Private Systems")),
-              br() #,
+              br(),
                 
-              # strong("Table 6-4: Private SMPs with Post-Construction SRTs Performed"),
-              #   reactableOutput(ns("Private SMPs with Post-Construction SRTs Performed")),
-              # br(),
+              strong("Table 6-4: Private SMPs with Post-Construction SRTs Performed"),
+                reactableOutput(ns("Private SMPs with Post-Construction SRTs Performed")),
+              br() #,
                 
               # strong("Table 6-5: Private Systems with CETs Administered"),
               #   reactableOutput(ns("Private Systems with CETs Administered")),
@@ -810,9 +810,54 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                        "To Date" = count.todate)
 
           return(private_postcon_srt)
-
         })
 
+        table_6_4 <- reactive({
+          #Private systems with post-con SRTs this FY
+          fy_private_postcon_srt_systems <- "select cr.\"smp_type\" as smp_type, count(distinct newtests.system_id) FROM 
+            (select system_id from fieldwork.viw_srt_full srt
+              group by system_id, public
+              having min(test_date) >= '%s'
+              and min(test_date) <= '%s'
+              and public = false) newtests
+              left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
+              group by cr.\"smp_type\""
+
+
+          fy_private_postcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                         paste(sprintf(fy_private_postcon_srt_systems, 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive()),
+                                                               collapse=""))
+
+          #Private systems with post-con SRTs to date
+          todate_private_postcon_srt_systems <-"select cr.\"smp_type\" as smp_type, count(distinct newtests.system_id) FROM 
+            (select system_id from fieldwork.viw_srt_full srt
+              group by system_id, public
+              having min(test_date) <= '%s'
+              and public = false) newtests
+              left join external.tbl_planreview_crosstab cr on newtests.system_id = cr.\"smp_id\"::text
+              group by cr.\"smp_type\""
+
+          todate_private_postcon_srt_systems_prod <- dbGetQuery(poolConn, 
+                                                             paste(sprintf(todate_private_postcon_srt_systems,
+                                                                           FYEND_reactive()),
+                                                                   collapse=""))
+
+          #Assembling output table
+          private_postcon_srt_bysystem <- left_join(todate_private_postcon_srt_systems_prod,
+                                          fy_private_postcon_srt_systems_prod,
+                                          by = "smp_type",
+                                          suffix = c(".todate", ".fy"))
+
+          rownames(private_postcon_srt_bysystem)<- private_postcon_srt_bysystem$smp_type
+          private_postcon_srt_bysystem <- transmute(private_postcon_srt_bysystem,
+                                       "This Fiscal Year" = replace_na(count.fy, 0),
+                                       "To Date" = count.todate)
+
+          return(private_postcon_srt_bysystem)
+
+        })
 
         
         #reactable table outputs
@@ -830,7 +875,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
         output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
         output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
-        # output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
+        output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
