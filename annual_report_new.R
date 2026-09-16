@@ -65,11 +65,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 5-11: Public Systems with Groundwater Monitoring"),
                 reactableOutput(ns("Public Systems with Groundwater Monitoring")),
-              br() #,
+              br(),
                 
-              # strong("Table 6-1: Summary of Post-Construction CWL Monitoring of Private Systems"),
-              #   reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Private Systems")),
-              # br(),
+              strong("Table 6-1: Summary of Post-Construction CWL Monitoring of Private Systems"),
+                reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Private Systems")),
+              br() #,
                 
               # strong("Table 6-2: Post-Construction CWL Monitoring of Private Systems Listed by Type"),
               #   reactableOutput(ns("Post-Construction CWL Monitoring of Private Systems Listed by Type")),
@@ -646,7 +646,82 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(public_gw)
         })
 
-        
+        table_6_1 <- reactive({
+
+          #Private sensors deployed this FY
+          fy_private_sensors_deployed <-  "select count(*) from fieldwork.viw_deployment_full_cwl
+                                            where (collection_dtime > '%s' OR collection_dtime is null)
+                                            and deployment_dtime between '%s' and '%s'
+                                            and public = FALSE"
+
+          fy_private_sensors_deployed_prod <- dbGetQuery(poolConn, 
+                                                         paste(sprintf(fy_private_sensors_deployed, 
+                                                                       FYSTART_reactive(), 
+                                                                       FYSTART_reactive(), 
+                                                                       FYEND_reactive()),
+                                                               collapse="")) 
+
+          #Private systems monitored this FY
+          fy_private_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
+                                            where deployment_dtime between '%s' and '%s'
+                                            and (collection_dtime >= '%s'
+                                                or collection_dtime is null) 
+                                            and d.public = false"
+          fy_private_systems_monitored_prod <- dbGetQuery(poolConn, paste(sprintf(fy_private_systems_monitored, 
+                                                                    FYSTART_reactive(), 
+                                                                    FYEND_reactive(), 
+                                                                    FYSTART_reactive()),
+                                                            collapse="")) 
+
+          #Newly monitored systems this fiscal year (private)
+          fy_private_systems_newly_monitored <-"select count(distinct admin.fun_smp_to_system(newdeployments.smp_id)) FROM 
+                                                      (select d.smp_id FROM fieldwork.viw_deployment_full_cwl d 
+                                                         group BY d.smp_id, d.public
+                                                         having min(d.deployment_dtime) > '%s'
+                                                         and min(d.deployment_dtime) <= '%s'
+                                                         and d.public = false) newdeployments"
+          fy_private_systems_newly_monitored_prod <- dbGetQuery(poolConn, 
+                                                                paste(sprintf(fy_private_systems_newly_monitored,
+                                                                              FYSTART_reactive(), 
+                                                                              FYEND_reactive()),
+                                                                      collapse=""))
+
+          #Private sensor deployments to date
+          todate_private_sensors_deployed <- "select count(*) from fieldwork.viw_deployment_full_cwl
+                                            where deployment_dtime < '%s'
+                                            and public = FALSE"
+
+          todate_private_sensors_deployed_prod <- dbGetQuery(poolConn, 
+                                                        paste(sprintf(todate_private_sensors_deployed,
+                                                                      FYEND_reactive()),
+                                                              collapse="")) 
+
+          #Private systems monitored to date
+          todate_private_systems_monitored <- "select count(distinct admin.fun_smp_to_system(d.smp_id)) from fieldwork.viw_deployment_full_cwl d
+                                            where deployment_dtime <= '%s'
+                                            and d.public = false"
+          todate_private_systems_monitored_prod <- dbGetQuery(poolConn, 
+                                                    paste(sprintf(todate_private_systems_monitored, 
+                                                                  FYEND_reactive()),
+                                                          collapse="")) 
+
+          #Assembling output table
+          private_postcon_cwl <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
+          private_postcon_cwl$fy <- c(fy_private_sensors_deployed_prod$count, #private sensors deployed
+                                     fy_private_systems_monitored_prod$count, #private systems monitored
+                                     fy_private_systems_newly_monitored_prod$count) #private systems newly monitored
+          
+          private_postcon_cwl$todate <- c(todate_private_sensors_deployed_prod$count, #private sensors deployed
+                                         todate_private_systems_monitored_prod$count, #private systems monitored
+                                         NA) #private systems newly monitored is only defined for the FY
+          
+          colnames(private_postcon_cwl)<- c("This Fiscal Year","To Date")
+          rownames(private_postcon_cwl)<-c("Sensors Deployed","Systems Monitored","Systems Newly Monitored")
+          
+          return(private_postcon_cwl)
+        })
+
+
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -660,7 +735,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Inlet Conveyance Tests Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
-        # output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
+        output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
         # output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
