@@ -53,11 +53,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 5-8: Public Systems with Infiltration Testing Administered"),
                 reactableOutput(ns("Public Systems with Infiltration Testing Administered")),
-                br()#,
+                br(),
                 
-              # strong("Table 5-9: Public Systems with Inlet Leakage Tests Administered"),
-              #   reactableOutput(ns("Public Systems with Inlet Leakage Tests Administered")),
-              # br(),
+              strong("Table 5-9: Public Systems with Inlet Leakage Tests Administered"),
+                reactableOutput(ns("Public Systems with Inlet Leakage Tests Administered")),
+              br() #,
                 
               # strong("Table 5-10: Inlet Conveyance Tests Performed on Public Systems"),
               #   reactableOutput(ns("Inlet Conveyance Tests Performed on Public Systems")),
@@ -205,7 +205,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           rownames(public_postcon_cwl)<-c("Sensors Deployed","Systems Monitored","Systems Newly Monitored")
           
           return(public_postcon_cwl)
-    
         })
 
         table_5_2 <- reactive({
@@ -257,7 +256,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           todate_public_prod$Description[todate_public_prod$`SMP Type` == "Permeable Pavement"] <- "Also listed as Pervious Paving"
 
           return(todate_public_prod)
-
         })
 
         table_5_3 <- reactive({
@@ -440,8 +438,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                        "To Date" = count.todate)
 
           return(public_midcon_srt_bysystem)
-
-
         })
 
         table_5_7 <- reactive({
@@ -481,7 +477,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                    "To Date" = todate)
 
           return(public_cet)
-
         })
 
         table_5_8 <- reactive({
@@ -518,6 +513,53 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 
           return(public_pp)
         })
+
+        table_5_9 <- reactive({
+          #Public systems with post-construction leakage tests this fy
+          fy_public_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date >= '%s' and 
+                 test_date <= '%s') leakage_tests"
+
+
+          fy_public_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                       paste(sprintf(fy_public_systems_leakage,
+                                                                     FYSTART_reactive(), 
+                                                                     FYEND_reactive()),
+                                                             collapse=""))
+
+          #public systems with post-con leakage tests to date
+          todate_public_systems_leakage <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Leakage Test' and 
+                 system_id similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date <= '%s') leakage_tests"
+
+
+          todate_public_systems_leakage_prod <- dbGetQuery(poolConn, 
+                                                           paste(sprintf(todate_public_systems_leakage,
+                                                                         FYEND_reactive()),
+                                                                 collapse=""))
+
+
+          #Assembling output table
+          public_systems_leakage <- data.frame(fy = fy_public_systems_leakage_prod$count, 
+                                   todate = todate_public_systems_leakage_prod$count)
+
+          rownames(public_systems_leakage) <- "Systems With Leakage Tests Administered"
+          public_systems_leakage <- transmute(public_systems_leakage,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_systems_leakage)
+
+        })
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -528,7 +570,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(table_5_6(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
-        # output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
         # output$`Inlet Conveyance Tests Performed on Public Systems` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
         # output$`Groundwater Monitoring for Public GSI` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
         # output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
