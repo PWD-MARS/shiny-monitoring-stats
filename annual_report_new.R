@@ -253,14 +253,13 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
             left_join(todate_public_systems_monitored_bytype_prod, 
                       by=c("smp_smptype" = "asset_type"), 
                       suffix = c(".constructed", ".monitored")) |>
+            arrange(smp_smptype) |>                                   #Sort alphabetically
+            add_row(smp_smptype = "Total",
+              count.constructed = sum(todate_public_systems_constructed_bytype_prod$count), #No lazy eval in tibble::add_row()
+              count.monitored = sum(todate_public_systems_monitored_bytype_prod$count, na.rm = TRUE)) |>
             transmute(`SMP Type` = smp_smptype, 
                       `Monitored SMPs` = replace_na(count.monitored, 0),
-                      `Total Constructed Public SMPs` = count.constructed,
-                      Note = NA)
-
-          #Add Notes
-          todate_public_prod$Note[todate_public_prod$`SMP Type` == "Infiltration/Storage Trench"] <- "Also listed as Trench"
-          todate_public_prod$Note[todate_public_prod$`SMP Type` == "Permeable Pavement"] <- "Also listed as Pervious Paving"
+                      `Total Constructed Public SMPs` = count.constructed)
 
           return(todate_public_prod)
         })
