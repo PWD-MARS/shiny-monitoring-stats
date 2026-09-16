@@ -97,10 +97,7 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-8: Private Systems with WWIs Administered"),
                 reactableOutput(ns("Private Systems with WWIs Administered")),
-                br(),
-
-
-               
+                br()
              )
            )
   )
@@ -947,7 +944,6 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                    "To Date" = todate)
 
           return(private_leakage)
-
         })
 
         table_6_7 <- reactive({
@@ -991,6 +987,50 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_systems_ict)
         })
 
+        table_6_8 <- reactive({
+          #Private systems with wet weather inspections this FY
+          fy_private_systems_wwi <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Wet Weather Inspection' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date >= '%s' and 
+                 test_date <= '%s') wwi"
+
+          fy_private_systems_wwi_prod <- dbGetQuery(poolConn,
+                                                    paste(sprintf(fy_private_systems_wwi,
+                                                                  FYSTART_reactive(),
+                                                                  FYEND_reactive()),
+                                                          collapse = ""))
+
+          #Private systems with wet weather inspections to date
+          todate_private_systems_wwi <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_special_investigation_full 
+                 where system_id is not null and 
+                 special_investigation_type = 'Wet Weather Inspection' and 
+                 system_id not similar to '\\d+-\\d+' and 
+                 phase = 'Post-Construction' and
+                 test_date <= '%s') wwi"
+
+          todate_private_systems_wwi_prod <- dbGetQuery(poolConn,
+                                                        paste(sprintf(todate_private_systems_wwi,
+                                                                      FYEND_reactive()),
+                                                              collapse = ""))
+
+          #Assembling output table
+          private_systems_wwi <- data.frame(fy = fy_private_systems_wwi_prod$count, 
+                                   todate = todate_private_systems_wwi_prod$count)
+
+          rownames(private_systems_wwi) <- "Systems With Wet-Weather Inspections Administered"
+          private_systems_wwi <- transmute(private_systems_wwi,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_systems_wwi)
+
+        })
+
 
         
         #reactable table outputs
@@ -1012,7 +1052,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
         output$`Private Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
         output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
-        # output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_8(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_8(), striped = TRUE, pagination = FALSE))
 
         output$help_text <- renderText({
           paste("A Shiny App to Populate the Annual Report Stats" , 
