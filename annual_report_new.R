@@ -39,10 +39,10 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 reactableOutput(ns("Construction-Phase SRTs Performed on Public Systems")),
                 
               strong("Table 5-6: Public Systems with Construction-Phase SRTs Performed"),
-                reactableOutput(ns("Public Systems with Construction-Phase SRTs Performed")) #,
+                reactableOutput(ns("Public Systems with Construction-Phase SRTs Performed")),
                 
-              # strong("Table 5-7: Public Systems with CETs Administered"),
-              #   reactableOutput(ns("Public Systems with CETs Administered")),
+              strong("Table 5-7: Public Systems with CETs Administered"),
+                reactableOutput(ns("Public Systems with CETs Administered")) #,
                 
               # strong("Table 5-8: Public Systems with Infiltration Testing Administered"),
               #   reactableOutput(ns("Public Systems with Infiltration Testing Administered")),
@@ -121,7 +121,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                             and deployment_dtime between '%s' and '%s'
                             and public =  TRUE"
           
-          fy_public_sensors_deployed_poolConn <- dbGetQuery(poolConn, paste(sprintf(fy_public_sensors_deployed, 
+          fy_public_sensors_deployed_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_sensors_deployed, 
                                                                             FYSTART_reactive(),
                                                                             FYSTART_reactive(), 
                                                                             FYEND_reactive()),
@@ -134,7 +134,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 		                                (deployment_dtime between '%s' and '%s'
 		                                or collection_dtime between '%s' and '%s'
 		                                or (deployment_dtime < '%s' and collection_dtime is null))"
-          fy_public_systems_monitored_poolConn <- dbGetQuery(poolConn, 
+          fy_public_systems_monitored_prod <- dbGetQuery(poolConn, 
                                                          paste(sprintf(fy_public_systems_monitored, 
                                                                        FYSTART_reactive(), 
                                                                        FYEND_reactive(), 
@@ -149,7 +149,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 		                                  public = true and
 		                                  first_deployment between '%s' and '%s'"
           
-          fy_public_systems_newly_monitored_poolConn <- dbGetQuery(poolConn, 
+          fy_public_systems_newly_monitored_prod <- dbGetQuery(poolConn, 
                                                                paste(sprintf(fy_public_systems_newly_monitored, 
                                                                              FYSTART_reactive(), 
                                                                              FYEND_reactive()),
@@ -160,7 +160,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 	                                                  where deployment_dtime <= '%s'
 	                                                  and public = TRUE"
           
-          todate_public_sensors_deployed_poolConn <- dbGetQuery(poolConn, paste(sprintf(todate_public_sensors_deployed,
+          todate_public_sensors_deployed_prod <- dbGetQuery(poolConn, paste(sprintf(todate_public_sensors_deployed,
                                                                                 FYEND_reactive()),
                                                                         collapse=""))
           
@@ -170,19 +170,19 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 	                                          where deployment_dtime <= '%s'
 	                                          and d.public = true"
           
-          todate_public_systems_monitored_poolConn <- dbGetQuery(poolConn, 
+          todate_public_systems_monitored_prod <- dbGetQuery(poolConn, 
                                                              paste(sprintf(todate_public_systems_monitored,
                                                                            FYEND_reactive()),
                                                                    collapse=""))
           
           #Assembling output table
           public_postcon_cwl <- data.frame("fy" = rep(NA, 3), "todate" = rep(NA, 3))
-          public_postcon_cwl$fy <- c(fy_public_sensors_deployed_poolConn$count, #Public sensors deployed
-                                     fy_public_systems_monitored_poolConn$count, #Public systems monitored
-                                     fy_public_systems_newly_monitored_poolConn$count) #Public systems newly monitored
+          public_postcon_cwl$fy <- c(fy_public_sensors_deployed_prod$count, #Public sensors deployed
+                                     fy_public_systems_monitored_prod$count, #Public systems monitored
+                                     fy_public_systems_newly_monitored_prod$count) #Public systems newly monitored
           
-          public_postcon_cwl$todate <- c(todate_public_sensors_deployed_poolConn$count, #Public sensors deployed
-                                         todate_public_systems_monitored_poolConn$count, #Public systems monitored
+          public_postcon_cwl$todate <- c(todate_public_sensors_deployed_prod$count, #Public sensors deployed
+                                         todate_public_systems_monitored_prod$count, #Public systems monitored
                                          NA) #Public systems newly monitored is only defined for the FY
           
           colnames(public_postcon_cwl)<- c("This Fiscal Year","To Date")
@@ -428,7 +428,45 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 
         })
 
+        table_5_7 <- reactive({
 
+          #Public CETs this FY
+          fy_public_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date >= '%s'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+
+          fy_public_cet_prod <- dbGetQuery(poolConn, 
+                                           paste(sprintf(fy_public_cet, 
+                                                         FYSTART_reactive(), 
+                                                         FYEND_reactive()),
+                                                 collapse=""))
+
+          #Public CETs to date
+          todate_public_cet <-"select count(distinct system_id) 
+                                                from fieldwork.viw_capture_efficiency_full 
+                                                where phase = 'Post-Construction'
+                                                and test_date <= '%s'
+                                                and public = TRUE"
+          todate_public_cet_prod <- dbGetQuery(poolConn, 
+                                               paste(sprintf(todate_public_cet,
+                                                             FYEND_reactive()),
+                                                     collapse=""))
+
+          #Assembling output table
+          public_cet <- data.frame(fy = fy_public_cet_prod$count, 
+                                   todate = todate_public_cet_prod$count)
+
+          rownames(public_cet) <- "Systems With CETs Administered"
+          public_cet <- transmute(public_cet,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(public_cet)
+
+        })
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -437,7 +475,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with Post-Construction SRTs Performed` <- renderReactable(reactable(table_5_4(), striped = TRUE, pagination = FALSE))
         output$`Construction-Phase SRTs Performed on Public Systems` <- renderReactable(reactable(table_5_5(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Construction-Phase SRTs Performed` <- renderReactable(reactable(table_5_6(), striped = TRUE, pagination = FALSE))
-        # output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with CETs Administered` <- renderReactable(reactable(table_5_7(), striped = TRUE, pagination = FALSE))
         # output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
         # output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
         # output$`Inlet Conveyance Tests Performed on Public Systems` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
