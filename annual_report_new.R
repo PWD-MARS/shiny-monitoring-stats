@@ -97,7 +97,10 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-8: Private Systems with WWIs Administered"),
                 reactableOutput(ns("Private Systems with WWIs Administered")),
-                br()
+                br(),
+
+              strong("Table 7-1: Collection System Dye Tests Administered"),
+                reactableOutput(ns("Collection System Dye Tests Administered"))
              )
            )
   )
@@ -1028,10 +1031,42 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
                                    "To Date" = todate)
 
           return(private_systems_wwi)
-
         })
 
+        table_7_1 <- reactive({
+          #Collection system dye tests this FY
+          fy_collection_dye <- "select count(*) from fieldwork.viw_special_investigation_full 
+                 where special_investigation_type = 'Private Plumbing' and 
+                 test_date >= '%s' and 
+                 test_date <= '%s'"
 
+          fy_collection_dye_prod <- dbGetQuery(poolConn,
+                                               paste(sprintf(fy_collection_dye,
+                                                             FYSTART_reactive(),
+                                                             FYEND_reactive()),
+                                                     collapse = ""))
+
+          #Collection system dye tests to date
+          todate_collection_dye <- "select count(*) from fieldwork.viw_special_investigation_full where
+                 special_investigation_type = 'Private Plumbing' and 
+                 test_date <= '%s'"
+
+          todate_collection_dye_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(todate_collection_dye,
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Assembling output table
+          collection_dye <- data.frame(fy = fy_collection_dye_prod$count, 
+                                   todate = todate_collection_dye_prod$count)
+
+          rownames(collection_dye) <- "Collection System Dye Tests Administered"
+          collection_dye <- transmute(collection_dye,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(collection_dye)
+        })
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -1053,6 +1088,8 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Private Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
         output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
         output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_8(), striped = TRUE, pagination = FALSE))
+        output$`Collection System Dye Tests Administered` <- renderReactable(reactable(table_7_1(), striped = TRUE, pagination = FALSE))
+
 
         output$help_text <- renderText({
           paste("A Shiny App to Populate the Annual Report Stats" , 
