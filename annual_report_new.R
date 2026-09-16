@@ -61,11 +61,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 5-10: Public Systems with Inlet Conveyance Tests Administered"),
                 reactableOutput(ns("Public Systems with Inlet Conveyance Tests Administered")),
-              br() #,
+              br(),
                 
-              # strong("Table 5-11: Groundwater Monitoring for Public GSI"),
-              #   reactableOutput(ns("Groundwater Monitoring for Public GSI")),
-              # br(),
+              strong("Table 5-11: Public Systems with Groundwater Monitoring"),
+                reactableOutput(ns("Public Systems with Groundwater Monitoring")),
+              br() #,
                 
               # strong("Table 6-1: Summary of Post-Construction CWL Monitoring of Private Systems"),
               #   reactableOutput(ns("Summary of Post-Construction CWL Monitoring of Private Systems")),
@@ -598,6 +598,55 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
 
           return(public_systems_ict)
         })
+
+        table_5_11 <- reactive({
+          #Public systems with preconstruction GW monitoring this FY
+          fy_public_precon_gw <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
+                                                          and deployment_dtime <= '%s'
+                                                          and (collection_dtime >= '%s' OR collection_dtime is null)
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+
+          fy_public_precon_gw_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_precon_gw, 
+                                                              FYEND_reactive(), 
+                                                              FYSTART_reactive()),
+                                                      collapse=""))
+
+          #Public systems with postconstruction GW monitoring this FY
+          fy_public_postcon_gw <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
+                                                          and deployment_dtime <= '%s'
+                                                          and (collection_dtime >= '%s' OR collection_dtime is null)
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          fy_public_postcon_gw_prod <- dbGetQuery(poolConn, paste(sprintf(fy_public_postcon_gw, 
+                                                               FYEND_reactive(), 
+                                                               FYSTART_reactive()),
+                                                       collapse=""))
+
+          #Public systems with preconstruction GW monitoring to date
+          todate_public_precon_gw <-"select count(distinct(site_name)) from fieldwork.viw_deployment_full where smp_id is null 
+                                                          and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          todate_public_precon_gw_prod <- dbGetQuery(poolConn, todate_public_precon_gw)
+
+          #Public systems with postconstruction GW monitoring to date
+          todate_public_postcon_gw <-"select count(distinct(smp_id)) from fieldwork.viw_deployment_full where smp_id is not null 
+                                                                                    and (ow_suffix LIKE 'GW_' or ow_suffix LIKE 'CW_')"
+          todate_public_postcon_gw_prod <- dbGetQuery(poolConn, todate_public_postcon_gw)
+
+
+          #Assembling output table
+          public_gw <- data.frame("fy" = rep(NA, 2), "todate" = rep(NA, 2))
+          public_gw$fy <- c(fy_public_precon_gw_prod$count, #Public precon GW systems this FY
+                                     fy_public_postcon_gw_prod$count) #Public postcon GW systems this FY
+          
+          public_gw$todate <- c(todate_public_precon_gw_prod$count, #Public postcon GW systems to date
+                                         todate_public_postcon_gw_prod$count) #Public postcon GW systems to date
+          
+          colnames(public_gw)<- c("This Fiscal Year","To Date")
+          rownames(public_gw)<-c("Systems with Pre-Construction GW Monitoring", "Systems with Post-Construction GW Monitoring")
+
+          return(public_gw)
+        })
+
+        
         
         #reactable table outputs
         output$`Summary of Post-Construction CWL Monitoring of Public SMPs` <- renderReactable(reactable(table_5_1(), striped = TRUE, pagination = FALSE))
@@ -610,7 +659,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Public Systems with Infiltration Testing Administered` <- renderReactable(reactable(table_5_8(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Inlet Leakage Tests Administered` <- renderReactable(reactable(table_5_9(), striped = TRUE, pagination = FALSE))
         output$`Public Systems with Inlet Conveyance Tests Administered` <- renderReactable(reactable(table_5_10(), striped = TRUE, pagination = FALSE))
-        # output$`Groundwater Monitoring for Public GSI` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
+        output$`Public Systems with Groundwater Monitoring` <- renderReactable(reactable(table_5_11(), striped = TRUE, pagination = FALSE))
         # output$`Summary of Post-Construction CWL Monitoring of Private Systems` <- renderReactable(reactable(table_6_1(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction CWL Monitoring of Private Systems Listed by Type` <- renderReactable(reactable(table_6_2(), striped = TRUE, pagination = FALSE))
         # output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
