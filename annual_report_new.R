@@ -85,11 +85,11 @@ a_reportUI <- function(id, label = "a_report", current_fy, years){
                 
               strong("Table 6-5: Private Systems with CETs Administered"),
                 reactableOutput(ns("Private Systems with CETs Administered")),
-              br() #,
+              br(),
                 
-              # strong("Table 6-6: Private Systems with ICTs Administered"),
-              #   reactableOutput(ns("Private Systems with ICTs Administered")),
-              # br(),
+              strong("Table 6-6: Private Systems with ICTs Administered"),
+                reactableOutput(ns("Private Systems with ICTs Administered")),
+              br() #,
                 
               # strong("Table 6-7: Private Systems with WWIs Administered"),
               #   reactableOutput(ns("Private Systems with WWIs Administered"))
@@ -898,6 +898,47 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
           return(private_cet)
         })
 
+        table_6_6 <- reactive({
+          #Private Systems with ICTs this fy
+          fy_private_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id not similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date >= '%s' and 
+                test_date <= '%s') ict"
+
+          fy_private_systems_ict_prod <- dbGetQuery(poolConn,
+                                                   paste(sprintf(fy_private_systems_ict,
+                                                                 FYSTART_reactive(),
+                                                                 FYEND_reactive()),
+                                                         collapse = ""))
+
+          #Private Systems with ICTs to date
+          todate_private_systems_ict <- "select count(*) from 
+              (select distinct system_id from fieldwork.viw_inlet_conveyance_full
+                where system_id is not null and
+                system_id not similar to '\\d+-\\d+' and
+                phase = 'Post-Construction' and
+                test_date <= '%s') ict"
+
+          todate_private_systems_ict_prod <- dbGetQuery(poolConn,
+                                                       paste(sprintf(todate_private_systems_ict,
+                                                                     FYEND_reactive()),
+                                                             collapse = ""))
+
+          #Assembling output table
+          private_systems_ict <- data.frame(fy = fy_private_systems_ict_prod$count, 
+                                   todate = todate_private_systems_ict_prod$count)
+
+          rownames(private_systems_ict) <- "Systems With ICTs Administered"
+          private_systems_ict <- transmute(private_systems_ict,
+                                   "This Fiscal Year" = replace_na(fy, 0),
+                                   "To Date" = todate)
+
+          return(private_systems_ict)
+        })
+
 
         
         #reactable table outputs
@@ -917,7 +958,7 @@ a_reportServer <- function(id, parent_session, current_fy, poolConn){
         output$`Post-Construction SRTs performed on Private Systems` <- renderReactable(reactable(table_6_3(), striped = TRUE, pagination = FALSE))
         output$`Private SMPs with Post-Construction SRTs Performed` <- renderReactable(reactable(table_6_4(), striped = TRUE, pagination = FALSE))
         output$`Private Systems with CETs Administered` <- renderReactable(reactable(table_6_5(), striped = TRUE, pagination = FALSE))
-        # output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
+        output$`Private Systems with ICTs Administered` <- renderReactable(reactable(table_6_6(), striped = TRUE, pagination = FALSE))
         # output$`Private Systems with WWIs Administered` <- renderReactable(reactable(table_6_7(), striped = TRUE, pagination = FALSE))
 
         output$help_text <- renderText({
