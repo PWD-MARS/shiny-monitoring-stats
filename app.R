@@ -63,7 +63,7 @@ jscode <- 'window.onbeforeunload = function() { return "Please use the button on
 #each script contains a module, which includes UI and server code
 source("monitoring_stats.R")
 source("quarterly_report.R")
-source("annual_report_new.R")
+source("annual_report.R")
 
 
 
